@@ -1,0 +1,104 @@
+@font-face {
+    font-family: 'Fira Sans';
+    src: url('/fonts/fira-sans-regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Fira Sans';
+    src: url('/fonts/fira-sans-semibold.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Fira Sans';
+    src: url('/fonts/fira-sans-bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Fira Code';
+    src: url('/fonts/fira-code-regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Fira Code';
+    src: url('/fonts/fira-code-medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Fira Code';
+    src: url('/fonts/fira-code-bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    --color-background: #111417;
+    --color-card: #1b1e22;
+    --color-field: #0e1113;
+    --color-accent: #f27b00;
+    --color-secondary-accent: #0a5c8f;
+    --color-foreground: #e1e6eb;
+    --color-muted: #8a949f;
+    --color-border: #2d3139;
+
+    --color-success-bg: #0f3d2a;
+    --color-success-border: #1a7f4c;
+    --color-success-text: #a6ffcc;
+
+    --color-warning-bg: #3b2c12;
+    --color-warning-border: #8a6125;
+    --color-warning-text: #ffe0a6;
+
+    --color-destructive-bg: #3b1d22;
+    --color-destructive-border: #8a252c;
+    --color-destructive-text: #ff8c94;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom scrollbars and styling for dark theme */
+body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: 'Fira Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Bento card transitions */
+.bento-card {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bento-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(242, 123, 0, 0.4);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.7), 0 0 12px rgba(242, 123, 0, 0.15);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .bento-card {
+        transition: none !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+}
