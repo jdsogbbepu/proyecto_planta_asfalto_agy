@@ -42,6 +42,55 @@ const showingNavigationDropdown = ref(false);
                                     Panel de Control
                                 </NavLink>
                                 <NavLink
+                                    :href="route('ingresos.index')"
+                                    :active="route().current('ingresos.*')"
+                                    class="text-industrial-muted hover:text-white"
+                                >
+                                    Ingresos (Lotes)
+                                </NavLink>
+                                <NavLink
+                                    :href="route('despachos.index')"
+                                    :active="route().current('despachos.*')"
+                                    class="text-industrial-muted hover:text-white"
+                                >
+                                    Despachos (PEPS)
+                                </NavLink>
+                                <NavLink
+                                    :href="route('kardex.index')"
+                                    :active="route().current('kardex.*')"
+                                    class="text-industrial-muted hover:text-white"
+                                >
+                                    Kardex (PEPS)
+                                </NavLink>
+                                <NavLink
+                                    :href="route('materials.index')"
+                                    :active="route().current('materials.*')"
+                                    class="text-industrial-muted hover:text-white"
+                                >
+                                    Materiales
+                                </NavLink>
+                                <NavLink
+                                    :href="route('proveedores.index')"
+                                    :active="route().current('proveedores.*')"
+                                    class="text-industrial-muted hover:text-white"
+                                >
+                                    Proveedores
+                                </NavLink>
+                                <NavLink
+                                    :href="route('proyectos.index')"
+                                    :active="route().current('proyectos.*')"
+                                    class="text-industrial-muted hover:text-white"
+                                >
+                                    Proyectos
+                                </NavLink>
+                                <NavLink
+                                    :href="route('funcionarios.index')"
+                                    :active="route().current('funcionarios.*')"
+                                    class="text-industrial-muted hover:text-white"
+                                >
+                                    Funcionarios
+                                </NavLink>
+                                <NavLink
                                     v-if="$page.props.auth.user.role === 'administrador'"
                                     :href="route('users.index')"
                                     :active="route().current('users.*')"
@@ -155,6 +204,48 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('dashboard')"
                         >
                             Panel de Control
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('ingresos.index')"
+                            :active="route().current('ingresos.*')"
+                        >
+                            Ingresos (Lotes)
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('despachos.index')"
+                            :active="route().current('despachos.*')"
+                        >
+                            Despachos (PEPS)
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('kardex.index')"
+                            :active="route().current('kardex.*')"
+                        >
+                            Kardex (PEPS)
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('materials.index')"
+                            :active="route().current('materials.*')"
+                        >
+                            Materiales
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('proveedores.index')"
+                            :active="route().current('proveedores.*')"
+                        >
+                            Proveedores
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('proyectos.index')"
+                            :active="route().current('proyectos.*')"
+                        >
+                            Proyectos
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('funcionarios.index')"
+                            :active="route().current('funcionarios.*')"
+                        >
+                            Funcionarios
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             v-if="$page.props.auth.user.role === 'administrador'"
