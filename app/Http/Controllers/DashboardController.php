@@ -18,7 +18,7 @@ class DashboardController extends Controller
     {
         // 1. Get all materials with their current physical stocks (sum of active batches balance)
         $materials = Material::with('medida')
-            ->withSum('detalleIngresos as stock_actual', 'cantidad_actual_lote')
+            ->withSum('detallesIngreso as stock_actual', 'cantidad_actual_lote')
             ->orderBy('nombre')
             ->get()
             ->map(function ($material) {
