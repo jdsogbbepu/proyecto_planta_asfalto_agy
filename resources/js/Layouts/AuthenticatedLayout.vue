@@ -1,304 +1,264 @@
 <script setup>
 import { ref } from 'vue';
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
-import NavLink from '@/Components/NavLink.vue';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
 
-const showingNavigationDropdown = ref(false);
+const showingSidebar = ref(false);
+const toggleSidebar = () => {
+    showingSidebar.value = !showingSidebar.value;
+};
 </script>
 
 <template>
-    <div>
-        <div class="min-h-screen bg-industrial-bg text-industrial-foreground font-sans">
-            <nav
-                class="border-b border-industrial-border bg-industrial-card"
-            >
-                <!-- Primary Navigation Menu -->
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div class="flex h-16 justify-between">
-                        <div class="flex">
-                            <!-- Logo -->
-                            <div class="flex shrink-0 items-center">
-                                <Link :href="route('dashboard')">
-                                    <div class="flex items-center gap-2">
-                                        <span class="h-6 w-1.5 bg-[#f27b00] rounded-full"></span>
-                                        <span class="font-bold tracking-widest font-mono text-white text-lg">ASPHALT-AGY</span>
-                                    </div>
-                                </Link>
-                            </div>
+    <div class="min-h-screen bg-[#111417] text-[#e1e6eb] font-sans flex flex-col md:flex-row">
+        <!-- BACKGROUND AMBIENT GLOWS -->
+        <div class="absolute inset-0 pointer-events-none opacity-5 overflow-hidden z-0">
+            <div class="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#f27b00]/10 rounded-full blur-[130px]"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#0a5c8f]/10 rounded-full blur-[120px]"></div>
+        </div>
 
-                            <!-- Navigation Links -->
-                            <div
-                                class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
-                            >
-                                <NavLink
-                                    :href="route('dashboard')"
-                                    :active="route().current('dashboard')"
-                                    class="text-industrial-muted hover:text-white"
-                                >
-                                    Panel de Control
-                                </NavLink>
-                                <NavLink
-                                    :href="route('ingresos.index')"
-                                    :active="route().current('ingresos.*')"
-                                    class="text-industrial-muted hover:text-white"
-                                >
-                                    Ingresos (Lotes)
-                                </NavLink>
-                                <NavLink
-                                    :href="route('despachos.index')"
-                                    :active="route().current('despachos.*')"
-                                    class="text-industrial-muted hover:text-white"
-                                >
-                                    Despachos (PEPS)
-                                </NavLink>
-                                <NavLink
-                                    :href="route('kardex.index')"
-                                    :active="route().current('kardex.*')"
-                                    class="text-industrial-muted hover:text-white"
-                                >
-                                    Kardex (PEPS)
-                                </NavLink>
-                                <NavLink
-                                    :href="route('materials.index')"
-                                    :active="route().current('materials.*')"
-                                    class="text-industrial-muted hover:text-white"
-                                >
-                                    Materiales
-                                </NavLink>
-                                <NavLink
-                                    :href="route('proveedores.index')"
-                                    :active="route().current('proveedores.*')"
-                                    class="text-industrial-muted hover:text-white"
-                                >
-                                    Proveedores
-                                </NavLink>
-                                <NavLink
-                                    :href="route('proyectos.index')"
-                                    :active="route().current('proyectos.*')"
-                                    class="text-industrial-muted hover:text-white"
-                                >
-                                    Proyectos
-                                </NavLink>
-                                <NavLink
-                                    :href="route('funcionarios.index')"
-                                    :active="route().current('funcionarios.*')"
-                                    class="text-industrial-muted hover:text-white"
-                                >
-                                    Funcionarios
-                                </NavLink>
-                                <NavLink
-                                    v-if="$page.props.auth.user.role === 'administrador'"
-                                    :href="route('users.index')"
-                                    :active="route().current('users.*')"
-                                    class="text-industrial-muted hover:text-white"
-                                >
-                                    Usuarios
-                                </NavLink>
-                            </div>
-                        </div>
+        <!-- 1. LEFT SIDEBAR (Desktop) -->
+        <aside class="hidden md:flex md:w-64 lg:w-72 flex-col bg-[#1b1e22] border-r border-[#2d3139] shrink-0 z-20 relative select-none">
+            <!-- Sidebar Header / Logo -->
+            <div class="h-16 flex items-center px-6 border-b border-[#2d3139] bg-[#111417]/35">
+                <Link :href="route('dashboard')" class="flex items-center gap-2.5">
+                    <span class="h-6 w-2 bg-[#f27b00] rounded-full shadow-[0_0_8px_#f27b00] animate-pulse"></span>
+                    <span class="font-bold tracking-widest font-mono text-white text-base">ASPHALT-AGY</span>
+                </Link>
+            </div>
 
-                        <div class="hidden sm:ms-6 sm:flex sm:items-center">
-                            <!-- Settings Dropdown -->
-                            <div class="relative ms-3">
-                                <Dropdown align="right" width="48">
-                                    <template #trigger>
-                                        <span class="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                class="inline-flex items-center rounded-md border border-industrial-border bg-industrial-card px-3 py-2 text-sm font-medium leading-4 text-industrial-muted transition duration-150 ease-in-out hover:text-white focus:outline-none"
-                                            >
-                                                {{ $page.props.auth.user.name }} ({{ $page.props.auth.user.role }})
-
-                                                <svg
-                                                    class="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fill-rule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clip-rule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </template>
-
-                                    <template #content>
-                                        <DropdownLink
-                                            :href="route('profile.edit')"
-                                        >
-                                            Perfil
-                                        </DropdownLink>
-                                        <DropdownLink
-                                            :href="route('logout')"
-                                            method="post"
-                                            as="button"
-                                        >
-                                            Cerrar Sesión
-                                        </DropdownLink>
-                                    </template>
-                                </Dropdown>
-                            </div>
-                        </div>
-
-                        <!-- Hamburger -->
-                        <div class="-me-2 flex items-center sm:hidden">
-                            <button
-                                @click="
-                                    showingNavigationDropdown =
-                                        !showingNavigationDropdown
-                                "
-                                class="inline-flex items-center justify-center rounded-md p-2 text-industrial-muted transition duration-150 ease-in-out hover:bg-industrial-card hover:text-white focus:bg-industrial-card focus:text-white focus:outline-none"
-                            >
-                                <svg
-                                    class="h-6 w-6"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        :class="{
-                                            hidden: showingNavigationDropdown,
-                                            'inline-flex':
-                                                !showingNavigationDropdown,
-                                        }"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        :class="{
-                                            hidden: !showingNavigationDropdown,
-                                            'inline-flex':
-                                                showingNavigationDropdown,
-                                        }"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
+            <!-- Current User Info Section -->
+            <div class="px-5 py-4 border-b border-[#2d3139] bg-[#16191c]/50">
+                <div class="flex items-center gap-3">
+                    <!-- Industrial Avatar Initials -->
+                    <div class="h-9 w-9 rounded-lg bg-[#0e1113] border border-[#2d3139] flex items-center justify-center font-bold font-mono text-xs text-[#f27b00]">
+                        {{ $page.props.auth.user.name.substring(0, 2).toUpperCase() }}
+                    </div>
+                    <div class="truncate">
+                        <div class="text-xs font-bold text-white truncate">{{ $page.props.auth.user.name }}</div>
+                        <div class="text-[9px] font-mono font-bold text-industrial-muted uppercase tracking-wider mt-0.5">
+                            {{ $page.props.auth.user.role }}
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Responsive Navigation Menu -->
-                <div
-                    :class="{
-                        block: showingNavigationDropdown,
-                        hidden: !showingNavigationDropdown,
-                    }"
-                    class="sm:hidden"
+            <!-- Sidebar Navigation Links Stack -->
+            <nav class="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
+                <Link
+                    :href="route('dashboard')"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
+                    :class="route().current('dashboard') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
                 >
-                    <div class="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            :href="route('dashboard')"
-                            :active="route().current('dashboard')"
-                        >
-                            Panel de Control
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            :href="route('ingresos.index')"
-                            :active="route().current('ingresos.*')"
-                        >
-                            Ingresos (Lotes)
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            :href="route('despachos.index')"
-                            :active="route().current('despachos.*')"
-                        >
-                            Despachos (PEPS)
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            :href="route('kardex.index')"
-                            :active="route().current('kardex.*')"
-                        >
-                            Kardex (PEPS)
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            :href="route('materials.index')"
-                            :active="route().current('materials.*')"
-                        >
-                            Materiales
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            :href="route('proveedores.index')"
-                            :active="route().current('proveedores.*')"
-                        >
-                            Proveedores
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            :href="route('proyectos.index')"
-                            :active="route().current('proyectos.*')"
-                        >
-                            Proyectos
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            :href="route('funcionarios.index')"
-                            :active="route().current('funcionarios.*')"
-                        >
-                            Funcionarios
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            v-if="$page.props.auth.user.role === 'administrador'"
-                            :href="route('users.index')"
-                            :active="route().current('users.*')"
-                        >
-                            Gestión de Usuarios
-                        </ResponsiveNavLink>
-                    </div>
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />
+                    </svg>
+                    <span>Panel de Control</span>
+                </Link>
 
-                    <!-- Responsive Settings Options -->
-                    <div
-                        class="border-t border-industrial-border pb-1 pt-4"
-                    >
-                        <div class="px-4">
-                            <div
-                                class="text-base font-medium text-white"
-                            >
-                                {{ $page.props.auth.user.name }}
-                            </div>
-                            <div class="text-sm font-medium text-industrial-muted font-mono uppercase">
-                                {{ $page.props.auth.user.username }} | {{ $page.props.auth.user.role }}
-                            </div>
-                        </div>
+                <div class="h-px bg-[#2d3139]/50 my-2"></div>
+                <div class="text-[9px] font-bold text-industrial-muted uppercase tracking-wider px-3 mb-1">Operación</div>
 
-                        <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.edit')">
-                                Perfil
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                :href="route('logout')"
-                                method="post"
-                                as="button"
-                            >
-                                Cerrar Sesión
-                            </ResponsiveNavLink>
-                        </div>
-                    </div>
-                </div>
+                <Link
+                    :href="route('ingresos.index')"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
+                    :class="route().current('ingresos.*') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
+                >
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                    <span>Ingresos (Lotes)</span>
+                </Link>
+
+                <Link
+                    :href="route('despachos.index')"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
+                    :class="route().current('despachos.*') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
+                >
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                    <span>Despachos (PEPS)</span>
+                </Link>
+
+                <Link
+                    :href="route('kardex.index')"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
+                    :class="route().current('kardex.*') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
+                >
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>Kardex Físico</span>
+                </Link>
+
+                <div class="h-px bg-[#2d3139]/50 my-2"></div>
+                <div class="text-[9px] font-bold text-industrial-muted uppercase tracking-wider px-3 mb-1">Catálogos</div>
+
+                <Link
+                    :href="route('materials.index')"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
+                    :class="route().current('materials.*') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
+                >
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    <span>Materiales</span>
+                </Link>
+
+                <Link
+                    :href="route('proveedores.index')"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
+                    :class="route().current('proveedores.*') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
+                >
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <span>Proveedores</span>
+                </Link>
+
+                <Link
+                    :href="route('proyectos.index')"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
+                    :class="route().current('proyectos.*') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
+                >
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>Proyectos</span>
+                </Link>
+
+                <Link
+                    :href="route('funcionarios.index')"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
+                    :class="route().current('funcionarios.*') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
+                >
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <span>Funcionarios</span>
+                </Link>
+
+                <div v-if="$page.props.auth.user.role === 'administrador'" class="h-px bg-[#2d3139]/50 my-2"></div>
+                <div v-if="$page.props.auth.user.role === 'administrador'" class="text-[9px] font-bold text-industrial-muted uppercase tracking-wider px-3 mb-1">Seguridad</div>
+
+                <Link
+                    v-if="$page.props.auth.user.role === 'administrador'"
+                    :href="route('users.index')"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
+                    :class="route().current('users.*') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
+                >
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <span>Usuarios</span>
+                </Link>
             </nav>
 
-            <!-- Page Heading -->
-            <header
-                class="bg-industrial-card border-b border-industrial-border shadow-sm"
-                v-if="$slots.header"
-            >
-                <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                    <slot name="header" />
+            <!-- Sidebar Footer / Profile options / Logout -->
+            <div class="p-4 border-t border-[#2d3139] bg-[#111417]/35">
+                <div class="flex items-center justify-between">
+                    <Link :href="route('profile.edit')" class="text-xs font-semibold text-industrial-muted hover:text-white transition">
+                        Mi Perfil
+                    </Link>
+                    <Link :href="route('logout')" method="post" as="button" class="text-xs font-bold text-[#ff8c94] hover:text-[#ffa6ad] transition">
+                        Cerrar Sesión
+                    </Link>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 2. MOBILE HEADER & NAVIGATION -->
+        <header class="md:hidden flex h-16 items-center justify-between px-6 bg-[#1b1e22] border-b border-[#2d3139] z-20">
+            <Link :href="route('dashboard')" class="flex items-center gap-2">
+                <span class="h-5 w-1.5 bg-[#f27b00] rounded-full shadow-[0_0_8px_#f27b00]"></span>
+                <span class="font-bold tracking-widest font-mono text-white text-sm">ASPHALT-AGY</span>
+            </Link>
+
+            <button @click="toggleSidebar" class="p-2 text-industrial-muted hover:text-white transition">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path v-if="!showingSidebar" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    <path v-else stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </header>
+
+        <!-- Mobile Drawer Overlay Menu -->
+        <div v-if="showingSidebar" class="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex" @click.self="toggleSidebar">
+            <div class="w-64 bg-[#1b1e22] border-r border-[#2d3139] h-full flex flex-col justify-between">
+                <div>
+                    <div class="h-16 flex items-center px-6 border-b border-[#2d3139]">
+                        <span class="font-bold tracking-widest font-mono text-white text-sm">MENÚ PRINCIPAL</span>
+                    </div>
+
+                    <nav class="p-4 space-y-1.5" @click="toggleSidebar">
+                        <Link :href="route('dashboard')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('dashboard') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                            Panel de Control
+                        </Link>
+                        <Link :href="route('ingresos.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('ingresos.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                            Ingresos (Lotes)
+                        </Link>
+                        <Link :href="route('despachos.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('despachos.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                            Despachos (PEPS)
+                        </Link>
+                        <Link :href="route('kardex.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('kardex.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                            Kardex Físico
+                        </Link>
+                        <Link :href="route('materials.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('materials.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                            Materiales
+                        </Link>
+                        <Link :href="route('proveedores.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('proveedores.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                            Proveedores
+                        </Link>
+                        <Link :href="route('proyectos.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('proyectos.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                            Proyectos
+                        </Link>
+                        <Link :href="route('funcionarios.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('funcionarios.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                            Funcionarios
+                        </Link>
+                        <Link v-if="$page.props.auth.user.role === 'administrador'" :href="route('users.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('users.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                            Usuarios
+                        </Link>
+                    </nav>
+                </div>
+
+                <div class="p-4 border-t border-[#2d3139] bg-[#111417]/35" @click="toggleSidebar">
+                    <Link :href="route('profile.edit')" class="block text-xs font-semibold text-industrial-muted hover:text-white transition py-1">
+                        Mi Perfil
+                    </Link>
+                    <Link :href="route('logout')" method="post" as="button" class="block text-left text-xs font-bold text-[#ff8c94] hover:text-[#ffa6ad] transition py-1 w-full">
+                        Cerrar Sesión
+                    </Link>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. MAIN WORKSPACE / CONTENT AREA -->
+        <div class="flex-1 flex flex-col min-w-0 z-10 relative overflow-y-auto">
+            <!-- Top bar context information -->
+            <header class="hidden md:flex h-16 items-center justify-between px-8 border-b border-[#2d3139] bg-[#1b1e22]/50 backdrop-blur-sm sticky top-0 z-10">
+                <div class="flex items-center gap-4">
+                    <span class="text-xs text-industrial-muted font-mono">UBICACIÓN: EL ALTO - PLANTA DE ASFALTO</span>
+                </div>
+                
+                <!-- Quick User Profile drop menu or info -->
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <span class="text-xs font-bold text-white block">{{ $page.props.auth.user.name }}</span>
+                        <span class="text-[9px] font-mono text-industrial-muted uppercase">{{ $page.props.auth.user.role }}</span>
+                    </div>
                 </div>
             </header>
 
-            <!-- Page Content -->
-            <main>
+            <!-- Slot Header (if pages inject title and custom elements) -->
+            <div class="border-b border-[#2d3139]/80 bg-[#16191c]/80 backdrop-blur-sm px-6 py-5 sm:px-8" v-if="$slots.header">
+                <slot name="header" />
+            </div>
+
+            <!-- Main Content Slot -->
+            <main class="flex-1 relative">
                 <slot />
             </main>
         </div>
