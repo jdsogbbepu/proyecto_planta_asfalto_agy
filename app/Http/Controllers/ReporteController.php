@@ -22,6 +22,9 @@ class ReporteController extends Controller
 
         $selectedProyectoId = $request->input('id_proyecto', $proyectos->first()?->id);
         $selectedMaterialId = $request->input('id_material', $materials->first()?->id);
+        
+        $fechaDesde = $request->input('fecha_desde');
+        $fechaHasta = $request->input('fecha_hasta');
 
         $lotes = [];
         $kardex = [];
@@ -89,6 +92,18 @@ class ReporteController extends Controller
                 return $item;
             });
             
+            // 5. Apply date range filters on the computed ledger so the running balance remains historically correct
+            if ($fechaDesde) {
+                $kardex = $kardex->filter(function ($item) use ($fechaDesde) {
+                    return substr($item['fecha'], 0, 10) >= $fechaDesde;
+                });
+            }
+            if ($fechaHasta) {
+                $kardex = $kardex->filter(function ($item) use ($fechaHasta) {
+                    return substr($item['fecha'], 0, 10) <= $fechaHasta;
+                });
+            }
+
             // Reverse to display newest first in the ledger table
             $kardex = $kardex->reverse()->values();
         }
@@ -101,6 +116,8 @@ class ReporteController extends Controller
             'filtros' => [
                 'id_proyecto' => $selectedProyectoId ? (int) $selectedProyectoId : null,
                 'id_material' => $selectedMaterialId ? (int) $selectedMaterialId : null,
+                'fecha_desde' => $fechaDesde,
+                'fecha_hasta' => $fechaHasta,
             ]
         ]);
     }

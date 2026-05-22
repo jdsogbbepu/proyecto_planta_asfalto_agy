@@ -8,6 +8,7 @@ use App\Models\Material;
 use App\Models\Proveedor;
 use App\Models\Proyecto;
 use App\Models\Funcionario;
+use App\Models\RolePermission;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -43,14 +44,68 @@ class DatabaseSeeder extends Seeder
             'active' => true,
         ]);
 
-        // 2. Seed Units of Measure
+        // 2. Seed Role Permissions
+        $permisosDisponibles = [
+            'ver_dashboard',
+            'gestionar_usuarios',
+            'gestionar_materiales',
+            'gestionar_proveedores',
+            'gestionar_proyectos',
+            'gestionar_funcionarios',
+            'gestionar_ingresos',
+            'gestionar_salidas',
+            'ver_reportes',
+            'gestionar_permisos',
+            'ver_bitacora',
+        ];
+
+        // Administrador tiene todos los permisos
+        foreach ($permisosDisponibles as $permiso) {
+            RolePermission::create([
+                'role' => 'administrador',
+                'permission' => $permiso,
+            ]);
+        }
+
+        // Operador tiene permisos de operación y ver reportes/dashboard
+        $permisosOperador = [
+            'ver_dashboard',
+            'gestionar_materiales',
+            'gestionar_proveedores',
+            'gestionar_proyectos',
+            'gestionar_funcionarios',
+            'gestionar_ingresos',
+            'gestionar_salidas',
+            'ver_reportes',
+        ];
+        foreach ($permisosOperador as $permiso) {
+            RolePermission::create([
+                'role' => 'operador',
+                'permission' => $permiso,
+            ]);
+        }
+
+        // Visor tiene permisos únicamente de visualización de dashboard y reportes
+        $permisosVisor = [
+            'ver_dashboard',
+            'ver_reportes',
+        ];
+        foreach ($permisosVisor as $permiso) {
+            RolePermission::create([
+                'role' => 'visor',
+                'permission' => $permiso,
+            ]);
+        }
+
+        // 3. Seed Units of Measure
         $kg = UnidadMedida::create(['nombre' => 'Kilogramo', 'abreviacion' => 'kg']);
         $lt = UnidadMedida::create(['nombre' => 'Litro', 'abreviacion' => 'L']);
         $m3 = UnidadMedida::create(['nombre' => 'Metro cúbico', 'abreviacion' => 'm3']);
         $t = UnidadMedida::create(['nombre' => 'Tonelada', 'abreviacion' => 't']);
 
-        // 3. Seed Materials
+        // 4. Seed Materials
         Material::create([
+            'codigo_interno' => 'CA-6070',
             'nombre' => 'Cemento Asfáltico PEN 60/70',
             'descripcion' => 'Cemento asfáltico convencional de penetración para mezclas asfálticas.',
             'id_medida' => $kg->id,
@@ -58,6 +113,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Material::create([
+            'codigo_interno' => 'EM-CSS1H',
             'nombre' => 'Emulsión Asfáltica CSS-1h',
             'descripcion' => 'Emulsión asfáltica catiónica de rotura lenta para riegos de liga.',
             'id_medida' => $lt->id,
@@ -65,6 +121,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Material::create([
+            'codigo_interno' => 'GR-34',
             'nombre' => 'Grava Triturada 3/4"',
             'descripcion' => 'Agregado grueso para dosificación de mezcla asfáltica en caliente.',
             'id_medida' => $kg->id,
@@ -72,13 +129,14 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Material::create([
+            'codigo_interno' => 'AR-RIO',
             'nombre' => 'Arena Limpia de Río',
             'descripcion' => 'Agregado fino tamizado libre de limos y arcillas.',
             'id_medida' => $kg->id,
             'stock_minimo' => 20000.00
         ]);
 
-        // 4. Seed Suppliers
+        // 5. Seed Suppliers
         Proveedor::create([
             'razon_social' => 'YPFB Refinación S.A.',
             'nit' => '1020304021',
@@ -93,7 +151,7 @@ class DatabaseSeeder extends Seeder
             'direccion' => 'Canteras de Achocalla, La Paz'
         ]);
 
-        // 5. Seed Projects / Public Works
+        // 6. Seed Projects / Public Works
         Proyecto::create([
             'nombre' => 'Doble Vía Viacha - Pavimento Flexible Lote A',
             'ubicacion' => 'Distrito 8, El Alto',
@@ -121,7 +179,7 @@ class DatabaseSeeder extends Seeder
             'estado' => 'finalizado'
         ]);
 
-        // 6. Seed Officers
+        // 7. Seed Officers
         Funcionario::create([
             'nombre' => 'Ing. Milton Quispe Choque',
             'cargo' => 'Supervisor de Obra Municipal',

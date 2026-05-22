@@ -72,7 +72,7 @@ const getAvailableStock = (materialId) => {
     const stockRecord = props.stocksPorProyecto.find(
         s => s.id_proyecto === Number(form.id_proyecto) && s.id_material === Number(materialId)
     );
-    return stockRecord ? (float) => Number(stockRecord.stock_disponible) : 0;
+    return stockRecord ? Number(stockRecord.stock_disponible) : 0;
 };
 
 const getMaterialUnit = (materialId) => {

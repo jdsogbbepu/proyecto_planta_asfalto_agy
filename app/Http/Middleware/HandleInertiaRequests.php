@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use App\Models\RolePermission;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -29,10 +30,36 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+        $permissions = [];
+
+        if ($user) {
+            if ($user->role === 'administrador') {
+                $permissions = [
+                    'ver_dashboard',
+                    'gestionar_usuarios',
+                    'gestionar_materiales',
+                    'gestionar_proveedores',
+                    'gestionar_proyectos',
+                    'gestionar_funcionarios',
+                    'gestionar_ingresos',
+                    'gestionar_salidas',
+                    'ver_reportes',
+                    'gestionar_permisos',
+                    'ver_bitacora',
+                ];
+            } else {
+                $permissions = RolePermission::where('role', $user->role)
+                    ->pluck('permission')
+                    ->toArray();
+            }
+        }
+
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
+                'permissions' => $permissions,
             ],
         ];
     }

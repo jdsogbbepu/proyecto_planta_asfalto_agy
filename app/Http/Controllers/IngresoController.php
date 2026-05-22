@@ -7,8 +7,10 @@ use App\Models\DetalleIngreso;
 use App\Models\Material;
 use App\Models\Proveedor;
 use App\Models\Proyecto;
+use App\Models\BitacoraActividad;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class IngresoController extends Controller
@@ -68,6 +70,7 @@ class IngresoController extends Controller
             ]);
 
             // Save details (lotes)
+            $resumenItems = [];
             foreach ($validated['items'] as $item) {
                 DetalleIngreso::create([
                     'id_ingreso' => $ingreso->id,
@@ -76,7 +79,20 @@ class IngresoController extends Controller
                     'cantidad_adquirida' => $item['cantidad'],
                     'cantidad_actual_lote' => $item['cantidad'], // Initial balance equals acquired quantity
                 ]);
+
+                $material = Material::find($item['id_material']);
+                $proyecto = Proyecto::find($item['id_proyecto']);
+                $resumenItems[] = "{$item['cantidad']} de '{$material->nombre}' para obra '{$proyecto->nombre}'";
             }
+
+            // Registrar en bitácora
+            $detalleBitacora = "Se registró ingreso ID: {$ingreso->id}. Nro Ticket: " . ($ingreso->nro_ticket ?? 'N/A') . ", ODC: " . ($ingreso->odc ?? 'N/A') . ". Items: " . implode(', ', $resumenItems);
+            BitacoraActividad::create([
+                'id_usuario' => Auth::id(),
+                'accion' => 'Registro de Ingreso',
+                'detalle' => $detalleBitacora,
+                'ip_address' => $request->ip(),
+            ]);
 
             DB::commit();
 
@@ -90,7 +106,7 @@ class IngresoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Ingreso $ingreso)
+    public function destroy(Request $request, Ingreso $ingreso)
     {
         // Deleting historical records can corrupt the FIFO traceability.
         // We will restrict deletion of entries if any of their batches/lotes have already been consumed.
@@ -103,8 +119,20 @@ class IngresoController extends Controller
                 }
             }
 
+            $id = $ingreso->id;
+            $nro_ticket = $ingreso->nro_ticket;
+
             // If clean, we can cascade delete details and core record
             $ingreso->delete(); // Cascades on database foreign key for details
+
+            // Registrar en bitácora
+            BitacoraActividad::create([
+                'id_usuario' => Auth::id(),
+                'accion' => 'Eliminación de Ingreso',
+                'detalle' => "Se eliminó el registro de ingreso ID: {$id}. Ticket: " . ($nro_ticket ?? 'N/A') . ".",
+                'ip_address' => $request->ip(),
+            ]);
+
             DB::commit();
             return redirect()->route('ingresos.index')->with('success', 'Ingreso y lotes eliminados correctamente.');
         } catch (\Exception $e) {

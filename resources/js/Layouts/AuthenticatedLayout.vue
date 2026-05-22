@@ -47,6 +47,7 @@ const toggleSidebar = () => {
             <!-- Sidebar Navigation Links Stack -->
             <nav class="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
                 <Link
+                    v-if="$page.props.auth.permissions.includes('ver_dashboard')"
                     :href="route('dashboard')"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
                     :class="route().current('dashboard') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
@@ -57,10 +58,11 @@ const toggleSidebar = () => {
                     <span>Panel de Control</span>
                 </Link>
 
-                <div class="h-px bg-[#2d3139]/50 my-2"></div>
-                <div class="text-[9px] font-bold text-industrial-muted uppercase tracking-wider px-3 mb-1">Operación</div>
+                <div v-if="$page.props.auth.permissions.includes('gestionar_ingresos') || $page.props.auth.permissions.includes('gestionar_salidas') || $page.props.auth.permissions.includes('ver_reportes')" class="h-px bg-[#2d3139]/50 my-2"></div>
+                <div v-if="$page.props.auth.permissions.includes('gestionar_ingresos') || $page.props.auth.permissions.includes('gestionar_salidas') || $page.props.auth.permissions.includes('ver_reportes')" class="text-[9px] font-bold text-industrial-muted uppercase tracking-wider px-3 mb-1">Operación</div>
 
                 <Link
+                    v-if="$page.props.auth.permissions.includes('gestionar_ingresos')"
                     :href="route('ingresos.index')"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
                     :class="route().current('ingresos.*') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
@@ -72,6 +74,7 @@ const toggleSidebar = () => {
                 </Link>
 
                 <Link
+                    v-if="$page.props.auth.permissions.includes('gestionar_salidas')"
                     :href="route('despachos.index')"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
                     :class="route().current('despachos.*') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
@@ -83,6 +86,7 @@ const toggleSidebar = () => {
                 </Link>
 
                 <Link
+                    v-if="$page.props.auth.permissions.includes('ver_reportes')"
                     :href="route('kardex.index')"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
                     :class="route().current('kardex.*') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
@@ -93,10 +97,11 @@ const toggleSidebar = () => {
                     <span>Kardex Físico</span>
                 </Link>
 
-                <div class="h-px bg-[#2d3139]/50 my-2"></div>
-                <div class="text-[9px] font-bold text-industrial-muted uppercase tracking-wider px-3 mb-1">Catálogos</div>
+                <div v-if="$page.props.auth.permissions.includes('gestionar_materiales') || $page.props.auth.permissions.includes('gestionar_proveedores') || $page.props.auth.permissions.includes('gestionar_proyectos') || $page.props.auth.permissions.includes('gestionar_funcionarios')" class="h-px bg-[#2d3139]/50 my-2"></div>
+                <div v-if="$page.props.auth.permissions.includes('gestionar_materiales') || $page.props.auth.permissions.includes('gestionar_proveedores') || $page.props.auth.permissions.includes('gestionar_proyectos') || $page.props.auth.permissions.includes('gestionar_funcionarios')" class="text-[9px] font-bold text-industrial-muted uppercase tracking-wider px-3 mb-1">Catálogos</div>
 
                 <Link
+                    v-if="$page.props.auth.permissions.includes('gestionar_materiales')"
                     :href="route('materials.index')"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
                     :class="route().current('materials.*') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
@@ -108,6 +113,7 @@ const toggleSidebar = () => {
                 </Link>
 
                 <Link
+                    v-if="$page.props.auth.permissions.includes('gestionar_proveedores')"
                     :href="route('proveedores.index')"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
                     :class="route().current('proveedores.*') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
@@ -119,6 +125,7 @@ const toggleSidebar = () => {
                 </Link>
 
                 <Link
+                    v-if="$page.props.auth.permissions.includes('gestionar_proyectos')"
                     :href="route('proyectos.index')"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
                     :class="route().current('proyectos.*') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
@@ -131,6 +138,7 @@ const toggleSidebar = () => {
                 </Link>
 
                 <Link
+                    v-if="$page.props.auth.permissions.includes('gestionar_funcionarios')"
                     :href="route('funcionarios.index')"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
                     :class="route().current('funcionarios.*') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
@@ -141,11 +149,11 @@ const toggleSidebar = () => {
                     <span>Funcionarios</span>
                 </Link>
 
-                <div v-if="$page.props.auth.user.role === 'administrador'" class="h-px bg-[#2d3139]/50 my-2"></div>
-                <div v-if="$page.props.auth.user.role === 'administrador'" class="text-[9px] font-bold text-industrial-muted uppercase tracking-wider px-3 mb-1">Seguridad</div>
+                <div v-if="$page.props.auth.permissions.includes('gestionar_usuarios') || $page.props.auth.permissions.includes('gestionar_permisos') || $page.props.auth.permissions.includes('ver_bitacora')" class="h-px bg-[#2d3139]/50 my-2"></div>
+                <div v-if="$page.props.auth.permissions.includes('gestionar_usuarios') || $page.props.auth.permissions.includes('gestionar_permisos') || $page.props.auth.permissions.includes('ver_bitacora')" class="text-[9px] font-bold text-industrial-muted uppercase tracking-wider px-3 mb-1">Seguridad</div>
 
                 <Link
-                    v-if="$page.props.auth.user.role === 'administrador'"
+                    v-if="$page.props.auth.permissions.includes('gestionar_usuarios')"
                     :href="route('users.index')"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
                     :class="route().current('users.*') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
@@ -154,6 +162,30 @@ const toggleSidebar = () => {
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                     <span>Usuarios</span>
+                </Link>
+
+                <Link
+                    v-if="$page.props.auth.permissions.includes('gestionar_permisos')"
+                    :href="route('permisos.index')"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
+                    :class="route().current('permisos.*') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
+                >
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                    </svg>
+                    <span>Permisos</span>
+                </Link>
+
+                <Link
+                    v-if="$page.props.auth.permissions.includes('ver_bitacora')"
+                    :href="route('bitacora.index')"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150"
+                    :class="route().current('bitacora.*') ? 'bg-[#0a5c8f]/20 border border-[#0a5c8f]/40 text-[#5ab8ff]' : 'text-industrial-muted hover:text-white hover:bg-[#252a30]/50'"
+                >
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    <span>Bitácora</span>
                 </Link>
             </nav>
 
@@ -194,32 +226,38 @@ const toggleSidebar = () => {
                     </div>
 
                     <nav class="p-4 space-y-1.5" @click="toggleSidebar">
-                        <Link :href="route('dashboard')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('dashboard') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                        <Link v-if="$page.props.auth.permissions.includes('ver_dashboard')" :href="route('dashboard')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('dashboard') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
                             Panel de Control
                         </Link>
-                        <Link :href="route('ingresos.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('ingresos.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                        <Link v-if="$page.props.auth.permissions.includes('gestionar_ingresos')" :href="route('ingresos.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('ingresos.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
                             Ingresos (Lotes)
                         </Link>
-                        <Link :href="route('despachos.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('despachos.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                        <Link v-if="$page.props.auth.permissions.includes('gestionar_salidas')" :href="route('despachos.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('despachos.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
                             Despachos (PEPS)
                         </Link>
-                        <Link :href="route('kardex.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('kardex.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                        <Link v-if="$page.props.auth.permissions.includes('ver_reportes')" :href="route('kardex.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('kardex.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
                             Kardex Físico
                         </Link>
-                        <Link :href="route('materials.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('materials.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                        <Link v-if="$page.props.auth.permissions.includes('gestionar_materiales')" :href="route('materials.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('materials.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
                             Materiales
                         </Link>
-                        <Link :href="route('proveedores.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('proveedores.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                        <Link v-if="$page.props.auth.permissions.includes('gestionar_proveedores')" :href="route('proveedores.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('proveedores.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
                             Proveedores
                         </Link>
-                        <Link :href="route('proyectos.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('proyectos.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                        <Link v-if="$page.props.auth.permissions.includes('gestionar_proyectos')" :href="route('proyectos.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('proyectos.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
                             Proyectos
                         </Link>
-                        <Link :href="route('funcionarios.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('funcionarios.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                        <Link v-if="$page.props.auth.permissions.includes('gestionar_funcionarios')" :href="route('funcionarios.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('funcionarios.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
                             Funcionarios
                         </Link>
-                        <Link v-if="$page.props.auth.user.role === 'administrador'" :href="route('users.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('users.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                        <Link v-if="$page.props.auth.permissions.includes('gestionar_usuarios')" :href="route('users.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('users.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
                             Usuarios
+                        </Link>
+                        <Link v-if="$page.props.auth.permissions.includes('gestionar_permisos')" :href="route('permisos.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('permisos.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                            Permisos
+                        </Link>
+                        <Link v-if="$page.props.auth.permissions.includes('ver_bitacora')" :href="route('bitacora.index')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase text-white" :class="route().current('bitacora.*') ? 'bg-[#0a5c8f]/20 text-[#5ab8ff]' : ''">
+                            Bitácora
                         </Link>
                     </nav>
                 </div>

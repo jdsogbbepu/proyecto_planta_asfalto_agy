@@ -25,6 +25,7 @@ const searchUnitQuery = ref('');
 const filteredMaterials = computed(() => {
     return props.materials.filter(m => 
         m.nombre.toLowerCase().includes(searchMaterialQuery.value.toLowerCase()) ||
+        (m.codigo_interno && m.codigo_interno.toLowerCase().includes(searchMaterialQuery.value.toLowerCase())) ||
         (m.descripcion && m.descripcion.toLowerCase().includes(searchMaterialQuery.value.toLowerCase()))
     );
 });
@@ -43,6 +44,7 @@ const isEditingMaterial = ref(false);
 const editingMaterialId = ref(null);
 
 const materialForm = useForm({
+    codigo_interno: '',
     nombre: '',
     descripcion: '',
     id_medida: '',
@@ -63,6 +65,7 @@ const unitForm = useForm({
 const openCreateMaterialModal = () => {
     materialForm.clearErrors();
     materialForm.reset();
+    materialForm.codigo_interno = '';
     if (props.unidadMedidas.length > 0) {
         materialForm.id_medida = props.unidadMedidas[0].id;
     }
@@ -73,6 +76,7 @@ const openCreateMaterialModal = () => {
 
 const openEditMaterialModal = (material) => {
     materialForm.clearErrors();
+    materialForm.codigo_interno = material.codigo_interno || '';
     materialForm.nombre = material.nombre;
     materialForm.descripcion = material.descripcion || '';
     materialForm.id_medida = material.id_medida;
@@ -214,6 +218,7 @@ const confirmDeleteUnit = (unit) => {
                         <table class="w-full text-left text-sm text-[#e1e6eb]">
                             <thead class="text-xs text-industrial-muted uppercase bg-[#0e1113] border-b border-[#2d3139]">
                                 <tr>
+                                    <th class="px-6 py-4 font-semibold">Código</th>
                                     <th class="px-6 py-4 font-semibold">Material / Insumo</th>
                                     <th class="px-6 py-4 font-semibold">Descripción</th>
                                     <th class="px-6 py-4 font-semibold">Unidad</th>
@@ -227,6 +232,7 @@ const confirmDeleteUnit = (unit) => {
                                     :key="material.id" 
                                     class="hover:bg-[#1f2329]/50 transition duration-150"
                                 >
+                                    <td class="px-6 py-4 font-mono text-xs font-semibold text-industrial-muted">{{ material.codigo_interno || 'S/C' }}</td>
                                     <td class="px-6 py-4 font-medium text-white">{{ material.nombre }}</td>
                                     <td class="px-6 py-4 text-industrial-muted text-xs">{{ material.descripcion || 'Sin descripción' }}</td>
                                     <td class="px-6 py-4">
@@ -253,7 +259,7 @@ const confirmDeleteUnit = (unit) => {
                                     </td>
                                 </tr>
                                 <tr v-if="filteredMaterials.length === 0">
-                                    <td colspan="5" class="px-6 py-12 text-center text-industrial-muted">
+                                    <td colspan="6" class="px-6 py-12 text-center text-industrial-muted">
                                         No se encontraron materiales registrados.
                                     </td>
                                 </tr>
@@ -342,6 +348,17 @@ const confirmDeleteUnit = (unit) => {
                     </div>
 
                     <form @submit.prevent="submitMaterialForm" class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-industrial-muted uppercase tracking-wider mb-2">Código Interno</label>
+                            <input
+                                type="text"
+                                class="w-full bg-[#0e1113] text-[#e1e6eb] border border-[#2d3139] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#f27b00] font-mono"
+                                v-model="materialForm.codigo_interno"
+                                placeholder="Ej. CA-6070 (Opcional)"
+                            />
+                            <div v-if="materialForm.errors.codigo_interno" class="mt-1 text-xs text-[#ff8c94] font-mono">{{ materialForm.errors.codigo_interno }}</div>
+                        </div>
+
                         <div>
                             <label class="block text-xs font-semibold text-industrial-muted uppercase tracking-wider mb-2">Nombre del Material</label>
                             <input

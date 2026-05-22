@@ -8,8 +8,10 @@ use App\Models\DetalleIngreso;
 use App\Models\Funcionario;
 use App\Models\Proyecto;
 use App\Models\Material;
+use App\Models\BitacoraActividad;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class SalidaController extends Controller
@@ -82,6 +84,7 @@ class SalidaController extends Controller
                 'fecha_salida' => $validated['fecha_salida'],
             ]);
 
+            $resumenItems = [];
             foreach ($validated['items'] as $item) {
                 $materialId = $item['id_material'];
                 $cantSolicitada = (float) $item['cantidad'];
@@ -89,8 +92,8 @@ class SalidaController extends Controller
 
                 // 1. Verify total available stock for this material and project
                 $totalDisponible = (float) DetalleIngreso::where('id_material', $materialId)
-                    ->where('id_proyecto', $proyectoId)
-                    ->sum('cantidad_actual_lote');
+                     ->where('id_proyecto', $proyectoId)
+                     ->sum('cantidad_actual_lote');
 
                 if ($cantSolicitada > $totalDisponible) {
                     throw new \Exception("Stock insuficiente. El material solicitado no cuenta con saldo disponible suficiente en este proyecto. Solicitado: {$cantSolicitada}, Disponible: {$totalDisponible}");
@@ -140,7 +143,22 @@ class SalidaController extends Controller
                 if ($restante > 0) {
                     throw new \Exception("Error crítico al procesar PEPS. No se pudieron consumir todas las unidades solicitadas.");
                 }
+
+                $material = Material::find($materialId);
+                $resumenItems[] = "{$cantSolicitada} de '{$material->nombre}'";
             }
+
+            // Registrar en bitácora
+            $proyecto = Proyecto::find($validated['id_proyecto']);
+            $funcionario = Funcionario::find($validated['id_funcionario']);
+            $detalleBitacora = "Se registró despacho ID: {$salida->id} para la obra '{$proyecto->nombre}', entregado a '{$funcionario->nombre}'. Uso: {$salida->uso}. Items: " . implode(', ', $resumenItems);
+            
+            BitacoraActividad::create([
+                'id_usuario' => Auth::id(),
+                'accion' => 'Registro de Despacho',
+                'detalle' => $detalleBitacora,
+                'ip_address' => $request->ip(),
+            ]);
 
             DB::commit();
 
@@ -154,12 +172,16 @@ class SalidaController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Salida $salida)
+    public function destroy(Request $request, Salida $salida)
     {
         // Deleting a dispatch reverts the consumed stocks back to their corresponding batches!
         DB::beginTransaction();
 
         try {
+            $id = $salida->id;
+            $proyectoNombre = $salida->proyecto->nombre;
+            $funcionarioNombre = $salida->funcionario->nombre;
+
             foreach ($salida->detalles as $detalleSalida) {
                 $lote = DetalleIngreso::find($detalleSalida->id_detalle_ingreso);
                 if ($lote) {
@@ -171,6 +193,14 @@ class SalidaController extends Controller
             }
 
             $salida->delete(); // Cascades on database for details
+
+            // Registrar en bitácora
+            BitacoraActividad::create([
+                'id_usuario' => Auth::id(),
+                'accion' => 'Reversión de Despacho',
+                'detalle' => "Se revirtió (eliminó) el despacho ID: {$id} que fue destinado a '{$proyectoNombre}', retirado por '{$funcionarioNombre}'. Los lotes de ingreso fueron restaurados.",
+                'ip_address' => $request->ip(),
+            ]);
 
             DB::commit();
             return redirect()->route('despachos.index')->with('success', 'Despacho revertido correctamente. Los saldos de los lotes fueron restaurados.');

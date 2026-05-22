@@ -12,6 +12,7 @@ use App\Models\Ingreso;
 use App\Models\DetalleIngreso;
 use App\Models\Salida;
 use App\Models\DetalleSalida;
+use App\Models\RolePermission;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -19,13 +20,31 @@ class PepsAlgorithmTest extends TestCase
 {
     use RefreshDatabase;
 
+    private function seedOperadorPermissions(): void
+    {
+        $permisos = [
+            'ver_dashboard',
+            'gestionar_materiales',
+            'gestionar_proveedores',
+            'gestionar_proyectos',
+            'gestionar_funcionarios',
+            'gestionar_ingresos',
+            'gestionar_salidas',
+            'ver_reportes',
+        ];
+        foreach ($permisos as $permiso) {
+            RolePermission::create(['role' => 'operador', 'permission' => $permiso]);
+        }
+    }
+
     public function test_peps_fifo_sequential_depletion_and_reversion(): void
     {
-        // 1. Setup seed data
+        $this->seedOperadorPermissions();
+
         $user = User::factory()->create(['role' => 'operador']);
         
         $medida = UnidadMedida::create([
-            'nombre' => 'Kilogramos',
+            'nombre' => 'Kilogramo',
             'abreviacion' => 'kg'
         ]);
 
@@ -43,16 +62,15 @@ class PepsAlgorithmTest extends TestCase
 
         $proyecto = Proyecto::create([
             'nombre' => 'Viaducto San José - El Alto',
-            'descripcion' => 'Obra municipal',
+            'ubicacion' => 'Distrito 3, El Alto',
             'encargado' => 'Ing. Pérez',
             'estado' => 'activo'
         ]);
 
         $funcionario = Funcionario::create([
             'nombre' => 'Pedro Quispe',
-            'ci' => '6789012',
             'cargo' => 'Residente de Obra',
-            'telefono' => '71234567',
+            'area' => 'Infraestructura',
             'activo' => true
         ]);
 
