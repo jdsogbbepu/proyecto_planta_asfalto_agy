@@ -16,8 +16,7 @@ return new class extends Migration
             $table->string('nombre', 150);
             $table->string('ubicacion', 255)->nullable();
             $table->string('encargado', 100)->nullable();
-            $table->date('fecha_inicio')->nullable();
-            $table->date('fecha_fin')->nullable();
+            $table->date('fecha')->nullable();
             $table->enum('estado', ['activo', 'finalizado', 'pausado'])->default('activo');
             $table->timestamps();
         });

@@ -13,8 +13,7 @@ class Proyecto extends Model
         'nombre',
         'ubicacion',
         'encargado',
-        'fecha_inicio',
-        'fecha_fin',
+        'fecha',
         'estado',
     ];
 

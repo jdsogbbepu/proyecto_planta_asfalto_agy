@@ -31,8 +31,7 @@ const form = useForm({
     nombre: '',
     ubicacion: '',
     encargado: '',
-    fecha_inicio: '',
-    fecha_fin: '',
+    fecha: '',
     estado: 'activo',
 });
 
@@ -49,8 +48,7 @@ const openEditModal = (proyecto) => {
     form.nombre = proyecto.nombre;
     form.ubicacion = proyecto.ubicacion || '';
     form.encargado = proyecto.encargado || '';
-    form.fecha_inicio = proyecto.fecha_inicio || '';
-    form.fecha_fin = proyecto.fecha_fin || '';
+    form.fecha = proyecto.fecha || '';
     form.estado = proyecto.estado;
     isEditing.value = true;
     editingProyectoId.value = proyecto.id;
@@ -142,7 +140,7 @@ const getStatusLabel = (status) => {
                                 <th class="px-6 py-4 font-semibold">Proyecto / Obra</th>
                                 <th class="px-6 py-4 font-semibold">Ubicación</th>
                                 <th class="px-6 py-4 font-semibold">Encargado de Obra</th>
-                                <th class="px-6 py-4 font-semibold font-mono">Duración</th>
+                                <th class="px-6 py-4 font-semibold font-mono">Fecha</th>
                                 <th class="px-6 py-4 font-semibold text-center">Estado</th>
                                 <th v-if="$page.props.auth.user.role !== 'visor'" class="px-6 py-4 font-semibold text-right">Acciones</th>
                             </tr>
@@ -157,7 +155,7 @@ const getStatusLabel = (status) => {
                                 <td class="px-6 py-4 text-xs text-industrial-foreground">{{ proyecto.ubicacion || 'Sin ubicación' }}</td>
                                 <td class="px-6 py-4 text-xs text-industrial-foreground">{{ proyecto.encargado || 'Sin encargado' }}</td>
                                 <td class="px-6 py-4 font-mono text-xs text-industrial-muted">
-                                    {{ proyecto.fecha_inicio || 'S/F' }} a {{ proyecto.fecha_fin || 'S/F' }}
+                                    {{ proyecto.fecha || 'S/F' }}
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     <span 
@@ -251,38 +249,28 @@ const getStatusLabel = (status) => {
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-semibold text-industrial-muted uppercase tracking-wider mb-2">Fecha de Inicio</label>
+                                <label class="block text-xs font-semibold text-industrial-muted uppercase tracking-wider mb-2">Fecha del Proyecto</label>
                                 <input
                                     type="date"
                                     class="w-full bg-[#0e1113] text-[#e1e6eb] border border-[#2d3139] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#f27b00] font-mono"
-                                    v-model="form.fecha_inicio"
+                                    v-model="form.fecha"
                                 />
-                                <div v-if="form.errors.fecha_inicio" class="mt-1 text-xs text-[#ff8c94] font-mono">{{ form.errors.fecha_inicio }}</div>
+                                <div v-if="form.errors.fecha" class="mt-1 text-xs text-[#ff8c94] font-mono">{{ form.errors.fecha }}</div>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-industrial-muted uppercase tracking-wider mb-2">Fecha Estimada de Fin</label>
-                                <input
-                                    type="date"
-                                    class="w-full bg-[#0e1113] text-[#e1e6eb] border border-[#2d3139] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#f27b00] font-mono"
-                                    v-model="form.fecha_fin"
-                                />
-                                <div v-if="form.errors.fecha_fin" class="mt-1 text-xs text-[#ff8c94] font-mono">{{ form.errors.fecha_fin }}</div>
+                                <label class="block text-xs font-semibold text-industrial-muted uppercase tracking-wider mb-2">Estado de Ejecución</label>
+                                <select
+                                    class="w-full bg-[#0e1113] text-[#e1e6eb] border border-[#2d3139] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#f27b00]"
+                                    v-model="form.estado"
+                                    required
+                                >
+                                    <option value="activo">Activo / En Ejecución</option>
+                                    <option value="pausado">Pausado / En Espera</option>
+                                    <option value="finalizado">Finalizado / Concluido</option>
+                                </select>
+                                <div v-if="form.errors.estado" class="mt-1 text-xs text-[#ff8c94] font-mono">{{ form.errors.estado }}</div>
                             </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-industrial-muted uppercase tracking-wider mb-2">Estado de Ejecución</label>
-                            <select
-                                class="w-full bg-[#0e1113] text-[#e1e6eb] border border-[#2d3139] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#f27b00]"
-                                v-model="form.estado"
-                                required
-                            >
-                                <option value="activo">Activo / En Ejecución</option>
-                                <option value="pausado">Pausado / En Espera</option>
-                                <option value="finalizado">Finalizado / Concluido</option>
-                            </select>
-                            <div v-if="form.errors.estado" class="mt-1 text-xs text-[#ff8c94] font-mono">{{ form.errors.estado }}</div>
                         </div>
 
                         <div class="pt-4 border-t border-[#2d3139] flex justify-end gap-3 mt-6">

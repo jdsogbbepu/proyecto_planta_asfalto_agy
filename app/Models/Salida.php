@@ -14,6 +14,7 @@ class Salida extends Model
         'id_funcionario',
         'id_proyecto',
         'id_usuario',
+        'odc',
         'uso',
         'fecha_salida',
     ];

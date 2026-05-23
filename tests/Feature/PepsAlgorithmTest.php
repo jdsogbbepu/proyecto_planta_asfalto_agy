@@ -138,8 +138,12 @@ class PepsAlgorithmTest extends TestCase
             'fecha_salida' => now()->format('Y-m-d'),
             'items' => [
                 [
-                    'id_material' => $material->id,
-                    'cantidad' => 180
+                    'id_detalle_ingreso' => $batch1->id,
+                    'cantidad_salida' => 100
+                ],
+                [
+                    'id_detalle_ingreso' => $batch2->id,
+                    'cantidad_salida' => 80
                 ]
             ]
         ]);

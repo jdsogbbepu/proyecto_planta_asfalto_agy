@@ -98,6 +98,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('despachos/crear', [SalidaController::class, 'create'])->name('despachos.create');
         Route::post('despachos', [SalidaController::class, 'store'])->name('despachos.store');
         Route::delete('despachos/{salida}', [SalidaController::class, 'destroy'])->name('despachos.destroy');
+        Route::get('despachos/lotes/{id_proyecto}', [SalidaController::class, 'getLotesPorProyecto'])->name('despachos.lotes');
     });
 
     // Reportes / Kardex (ver_reportes)

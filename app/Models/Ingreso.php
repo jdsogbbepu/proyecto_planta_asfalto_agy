@@ -15,6 +15,7 @@ class Ingreso extends Model
         'odc',
         'id_proveedor',
         'id_usuario',
+        'id_funcionario',
         'fecha_adquirida',
         'observaciones',
     ];
@@ -27,6 +28,11 @@ class Ingreso extends Model
     public function usuario(): BelongsTo
     {
         return $this->belongsTo(User::class, 'id_usuario');
+    }
+
+    public function funcionario(): BelongsTo
+    {
+        return $this->belongsTo(Funcionario::class, 'id_funcionario');
     }
 
     public function detalles(): HasMany

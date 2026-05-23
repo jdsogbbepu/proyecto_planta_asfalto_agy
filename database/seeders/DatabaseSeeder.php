@@ -228,8 +228,7 @@ class DatabaseSeeder extends Seeder
             'nombre' => 'Doble Vía Viacha - Pavimento Flexible Lote A',
             'ubicacion' => 'Distrito 8, Carretera a Viacha Km 12, El Alto',
             'encargado' => 'Ing. Carlos Flores Mamani',
-            'fecha_inicio' => '2026-02-01',
-            'fecha_fin' => '2026-10-31',
+            'fecha' => '2026-02-01',
             'estado' => 'activo',
         ]);
 
@@ -237,8 +236,7 @@ class DatabaseSeeder extends Seeder
             'nombre' => 'Avenida Juan Pablo II - Mantenimiento Vial',
             'ubicacion' => 'Distrito 6, Av. Juan Pablo II entre Av. 6 de Marzo y C. 1, El Alto',
             'encargado' => 'Ing. Sonia Quispe Quisbert',
-            'fecha_inicio' => '2026-05-10',
-            'fecha_fin' => '2026-07-15',
+            'fecha' => '2026-05-10',
             'estado' => 'activo',
         ]);
 
@@ -246,8 +244,7 @@ class DatabaseSeeder extends Seeder
             'nombre' => 'Viaducto San José - Distribuidor Vial',
             'ubicacion' => 'Distrito 3, Plaza San José, El Alto',
             'encargado' => 'Ing. Wilfredo Choque Layme',
-            'fecha_inicio' => '2025-09-01',
-            'fecha_fin' => '2026-04-30',
+            'fecha' => '2025-09-01',
             'estado' => 'finalizado',
         ]);
 
@@ -255,8 +252,7 @@ class DatabaseSeeder extends Seeder
             'nombre' => 'Calle 25 de Julio - Recapado Asfáltico',
             'ubicacion' => 'Distrito 12, Zona 25 de Julio, El Alto',
             'encargado' => 'Ing. René Copa Mamani',
-            'fecha_inicio' => '2026-04-01',
-            'fecha_fin' => '2026-08-30',
+            'fecha' => '2026-04-01',
             'estado' => 'activo',
         ]);
 
@@ -264,8 +260,7 @@ class DatabaseSeeder extends Seeder
             'nombre' => 'Acceso Aeropuerto Internacional - Mezcla SMA',
             'ubicacion' => 'Distrito 2, Acceso El Alto - La Paz, El Alto',
             'encargado' => 'Ing. Patricia Condori de Tapia',
-            'fecha_inicio' => '2026-03-15',
-            'fecha_fin' => '2026-09-15',
+            'fecha' => '2026-03-15',
             'estado' => 'pausado',
         ]);
 

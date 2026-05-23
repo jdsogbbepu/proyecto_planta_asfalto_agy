@@ -1,10 +1,10 @@
 ok entonces empecemos a modificar el sistema porque por lo que veo es muy distinto a lo que me imagino, planearemos para modificar todos y cada uno de las funciones del panel de control ok y ayudarme si algo no concuerda o si falta algo en conectar.
 mira primeramente quiero cambiar estas cosas:
-PROYECTOS.- a lo que yo veo segun el formato que me dieron de la planta(su PDF de impresion), para mi seria mejor primero registrar o crear un cierto proyecto (ejemplo: Mantenimiento vial "renuevavia - El Alto"(ADQ. de aridos para mantenimiento de vias en la ciudad de El Alto), mantenimiento vial "renuevavia - El Alto"(Adquisicion de lubricantes para maquinaria pesada)) y esta bien eso de registrar tambien su ubicacion, encargado/supervisor, estado de ejecucion, pero las fechas de inicio y fin en si no sera necesario(lo unico que quiero es que almenos se pueda registra el dia, mes y año porque lo usaremos en el ODC, abreviaciones para citas o informes del PDF).
+PROYECTOS.- a lo que yo veo segun el formato que me dieron de la planta(su PDF de impresion), para mi seria mejor primero registrar o crear un cierto proyecto ((Adquisicion de lubricantes para maquinaria pesada)) y esta bien eso de registrar tambien su ubicacion, encargado/supervisor, estado de ejecucion, pero las fechas de inicio y fin en si no sera necesario(lo unico que quiero es que almenos se pueda registra el dia, mes y año porque lo usaremos en el ODC, abreviaciones para citas o informes del PDF).
 Materiales.- esta bien todos sus campos de datos como: codigo interno, nombre del material, descripcion, unidad y sus acciones, pero ese campo de "STOCK minimo" no me parece acuerdo a lo que pienso, porque en si no controlare su STOCK.
 ahora hablando de campo de "Unidades de Medida" tambien esta bien todo.
 Ingresos (Lotes).- esta bien esa lista/historial que muestra al principio de Ingresos y Lotes, pero en la parte de "Registrar Ingreso" quiero cambiar algunas cosas como:
-1.Datos Generales.- esa parte de "Nro de ticket bascula" quiero que se autocomplete segun su siguiente numero(ejemplo: se registro un lote con el TKT-0009, el siguiente lote que registre se autocompletara en ese campo como TKT-0010) cabe especificar que ese espacio sera como Nro de registro en el sistema o ID de cada registro que se realice(no se podra editar ni cambiar, solo se podra ver que numero de registro es), lo siguiente que se registrara es el "Proyecto/Obra Municipal Destino"(que obviamente estara con su respectivo ComboBox para elegir mas rapido el proyecto), seguidamente sabiendo cual es el proyecto se autocompletara la parte de "Fecha de ingreso" con su fecha del proyecto(aunque se podria cambiar manualmente si quisieran), y finalmente se llenara la parte del "ODC"(completando los campos de XX/XXXX/ODC/XXX/ÑÑ, esa ÑÑ = los dos ultimos digitos del año que tiene como dato la fecha de proyecto, pero como campo igual de editable), abajo en Observaciones sera lo mismo.
+1.Datos Generales.- esa parte de "Nro de ticket bascula" quiero que se autocomplete segun su siguiente numero(ejemplo: se registro un lote con el TKT-0009, el siguiente lote que registre se autocompletara en ese campo como TKT-0010) cabe especificar que ese espacio sera como Nro de registro en el sistema o ID de cada registro que se realice(no se podra editar ni cambiar, solo se podra ver que numero de registro es), lo siguiente que se registrara es el "Proyecto/Obra Municipal Destino"(que obviamente estara con su respectivo ComboBox para elegir mas rapido el proyecto), seguidamente sabiendo cual es el proyecto se autocompletara la parte de "Fecha de ingreso" con su fecha del proyecto(aunque se podria cambiar manualmente si quisieran), luego se llenara la parte del "ODC"(completando los campos de XX/XXXX/ODC/XXX/ÑÑ, esa ÑÑ = los dos ultimos digitos del año que tiene como dato la fecha de proyecto, pero como campo igual de editable), finalmente se añadira "Funcionario Receptor"(como ComboBox para elegir a cierto funcionarios que se regsitraron) y abajo en Observaciones sera lo mismo.
 2. Materiales e insumos ingresados.- aqui esta bien el formato de orden pero lo ajustaremos, envez de(material/insumo, Proyecto, cantidad, accion) ahora sera(Nro, material/insumo, Unidad|cantidad adquirida, proveedor, accion).
 Nro: sera el numero de fila, ya que hay un boton de "agragar fila" y ya que habra una fila por defecto le correspondera el "Nro 1" y si agregamos otra fila ahi mismo le correspondera el "Nro 1"(no podra editarse ni borrarse).
 Material/insumo:Esta bien asi como esta.
@@ -12,3 +12,180 @@ Unidad:se autocompletara como esta para saber en que unidad se ingresara ese mat
 cantidad adquirida:esta bien asi como lo pusiste.
 proveedor: aqui si se pondra manualmente porque talvez no lleguen todos los materiales del mismo proveedor, y no quiero problemas de gestion
 accion: eso tambien esta bien asi como esta.
+ASI cambiaremos el los registros de lotes.
+ahora para la parte de la lista que se mira en "Ingresos y Lotes (PEPS)": cambiaremos un poco el orden de la vista, ese formato que tiene me gusta, hasta me gusta ese efecto de despliegue para ver el "Detalle de lotes generados" pero el orden envez de: Fecha, Nro. Ticket, Orden de Compra, Proveedor, Registro por, Nro Lotes, acciones. ahora será tipo asi: Nro. TICKET(RGTR-001), Nro de Lotes, Proyecto Destino, Fecha(del proyecto), ODC, Proveedor, registrado por, acciones(Editar y Eliminar).
+Ahora en la parte cuando se despliegue el "Detalle de lotes generados(PEPS)" se mostrara ahora mas detalladamente:
+envez de : Lote id, Material/Insumo, Proyecto Destino, Cant. Inicial , Saldo actual(Lote), estado de lote. ahora se vera con mas detalle: Nro. TICKET(RGTR-001), Nro de Lote(por cada lote), Material/Insumo, Unidad, Proyecto, Fecha, ODC, Cantidad Adquirida, Cantidad Utilizado, Stock en Planta(resta de: Cant. adq - Cant. Utilizada), Acciones Planificadas(se describe para que se usara el material), Funcionario Receptor, Estado del lote. (En la parte de Cantidad utilizada, Stock en Planta y acciones planificadas: estarán en blanco y no se podrán llenar o editar, amenos que se llene desde el Panel en "Despachos(PEPS)" que de ahí se conectara y actualizara según los datos que llenen recién de ahi).
+En "Despachos(PEPS)".- será casi igual que de "Ingresos(LOTES)" mostrara su lista que será asi: Nro. TICKET(RGTR-001), Nro de Lotes, Proyecto Destino, Fecha(del proyecto), ODC, Proveedor, registrado por, acciones(Editar y Eliminar) y al desplegar igual mostrara como "Ingresos(LOTES)" asi: Lote id, Material/Insumo, Proyecto Destino, Cant. Inicial , Saldo actual(Lote), estado de lote. ahora se vera con mas detalle: Nro. TICKET(RGTR-001), Nro de Lote(por cada lote), Material/Insumo, Unidad, Proyecto, Fecha, ODC, Cantidad Adquirida, Cantidad Utilizado, Stock en Planta(resta de: Cant. adq - Cant. Utilizada), Acciones Planificadas(se describe para que se usara el material), Funcionario Receptor, Estado del lote.
+Al entrar en "Registrar Salida/ Despacho(PEPS)":
+1. Información de la Entrega y Destino será parecido al de Ingresos:
+"Proyecto/Obra Municipal Destino"(que obviamente estara con su respectivo ComboBox para elegir mas rapido el proyecto), seguidamente sabiendo cual es el proyecto se autocompletara la parte de "Fecha de ingreso" con su fecha del proyecto(aunque se podria cambiar manualmente si quisieran), luego se llenara la parte del "ODC"(completando los campos de XX/XXXX/ODC/XXX/ÑÑ, esa ÑÑ = los dos ultimos digitos del año que tiene como dato la fecha de proyecto, pero como campo igual de editable), finalmente se añadira "Funcionario Receptor"(como ComboBox para elegir a cierto funcionarios que se regsitraron) y abajo en Observaciones sera lo mismo(se copiara lo que tenia en "Ingresos(LOTES)->Registrar ingresos de almacen" que también podrá ser editable). En si con seleccionar un proyecto ya se sobreescribira la mayoría de datos que se registraron anteriormente de "Ingresos(LOTES)->Registrar ingresos de almacen". 
+2. aquí si cambiara ya que también jalara los datos del proyecto según el Nro de TICKET, y todos sus lotes por Nro de lotes para mostrar esto:
+Nro. TICKET , Nro de Lotes(para cada material registrado del proyecto anteriormente),  Material/Insumo , Unidad. (hasta aqui esos campos mencionados serán autocompletados y no editables). lo siguientes campos también estarán estos campos en cada Lote para cada Material: Cantidad Utilizada, Stock en Planta(Cantidad adquirida - Cantidad Utilizada. y no se podrá editar) y finalmente se podrá llenar el campo de "Acciones PLanificadas". 
+ahora cual será la diferencia del botón de "editar de ACCIONES" de "Ingresos(LOTES)" y "Despachos(PEPS)" la diferencia es que al querer editar una parte del material será solo para su respectiva área que con se registran.
+
+----------------------------------------------------------------------------------------------------------
+Aquí primeramente me preguntaste cosas que tenias dudas y me pediste que te aclare con mis repuestas:
+
+Entiendo perfectamente. Antes de planear los cambios, tengo varias preguntas para clarificar y asegurarnos de que el resultado sea exactamente lo que necesitas:
+Preguntas de Clarificación
+1. Estructura de Proyectos (la más importante)
+Cuando mencionas esto:
+ejemplo: Mantenimiento vial "renuevavia - El Alto"(ADQ. de aridos para mantenimiento de vias...), mantenimiento vial "renuevavia - El Alto"(Adquisicion de lubricantes...)
+No me queda claro si te refieres a:
+- Opción A: Que "RenovVia El Alto" es UN proyecto con múltiples "líneas de adquisición"内部 (como si fueran sub-proyectos o categorías dentro del mismo proyecto). ¿Los lotes se registran bajo el proyecto padre, y la "descripción de adquisición" (ADQ. de aridos, Adquisicion de lubricantes) es solo un texto que describe para qué se usa, o debería ser un campo separado?
+- Opción B: ¿Que cada una de esas líneas ES un proyecto separado, y el nombre "renuevavia - El Alto" simplemente se repite en todos por coincidence (naming convention)?
+- Opción C: ¿Algo diferente?
+¿Podrías confirmarme cuál se acerca más? Si es la Opción A, ¿cómo guardamos eso en la base de datos — con un campo descripcion_adquisicion o tipo_adquisicion en la tabla de ingresos/lotes?
+2. Campo "Stock Mínimo" en Materiales
+Dices que no controlaras stock. Entonces:
+- ¿Eliminamos el campo stock_minimo de la tabla materials completamente, o
+- ¿Lo dejamos pero no se usa en ningún lado (por si en el futuro lo necesitan)?
+3. "Fecha de ingreso" en Ingresos y Despachos
+Cuando dices que al seleccionar un proyecto "se autocompletara la Fecha de ingreso", ¿a cuál fecha te refieres exactamente?
+- ¿A la fecha_inicio del proyecto?
+- ¿O a la fecha actual del día en que se registra el ingreso/despacho (que sería lo normal)?
+- ¿O a una fecha separada que ya estaría registrada en el proyecto y solo se muestra?
+4. Campo "Acciones Planificadas" en Lotes
+Este campo aparece en los detalles de lote tanto en Ingresos como en Despachos. ¿Qué es exactamente?
+- ¿Es una descripción del uso previsto del material (ej: "Para capa de rodadura tramo 0+000 a 0+500")?
+- ¿Es un campo de texto libre que el usuario llena manualmente?
+- ¿Está relacionado con algún flujo de aprobación o es solo informativo?
+5. Ticket/Registro - Formato "RGTR-001"
+Dices que el formato de número de registro será "RGTR-001". ¿Confirmed que quieres ese formato, o es solo un ejemplo? También: ¿este número de ticket se comparte entre Ingresos y Despachos (misma secuencia para ambos), o son secuencias separadas (Ingresos va TKT-0001, TKT-0002... y Despachos va DSP-0001, DSP-0002...)?
+6. Proveedor en la lista de Ingresos
+Cuando dices que en el detalle expandido de ingresos queremos "proveedor", pero que en el formulario de registro el proveedor se llena manualmente por fila (no a nivel de ingreso completo): ¿Cómo queremos que figure el proveedor en la vista list/historial? ¿Mostramos el proveedor de la primera fila, o concatenamos todos los proveedores de todas las filas?
+7. Sobre el "panel de abajo" de Ingresos que mencionas
+En la parte de Cantidad utilizada, Stock en Planta y acciones planificadas: estarán en blanco y no se podrán llenar o editar, amenos que se llene desde el Panel en "Despachos(PEPS)"
+Esto confirma que Ingresos es solo registro de entrada, y Despachos es donde se consume el stock. Esto ya está así en tu sistema actual (el PEPS consume desde los lotes en Despachos). ¿Está correcto entenderlo así?
+Cuando me confirmes estas preguntas, voy a redactar el Plan de Modificación detallado con todos los cambios en el frontend (Vues), backend (Controllers), base de datos (migraciones si hay cambios), y rutas. 
+¿Respondemos pregunta por pregunta?
+▣  Plan · MiniMax-M2.7 · 2m 18s
+
+respuestas a tus preguntas:
+1. opcion C: no es un proyecto multiple ni nada solo te di nombres de ejemplo de 2 proyectos diferentes y separados, no se relacionan en nada y son independientes y los nombres aunque se parezcan no son como plantillas, solo que asi les gusta nombrar asi sus proyectos y esa decision es de ello como la nombran por eso lo pongo como libre texto de escritura(que nombren sus proyectos como quieran).
+2. lo dejaremos ese campo de stock_minimo pero no la usaremos casi en nada y mostraremos pero la dejaremos por si la quieren usar a futuro.
+3. sobre las fechas solo quiero usar una fecha y si es la de fecha_inicio del proyecto de usar, y esa fecha se pondra al crear un proyecto y eligiendo una fecha que estara por defecto "hoy", pero se podria modificar si quieren, tambien esa misma fecha se podra modificar en otros lugares.
+4. si ese campo de acciones planificadas es para describir el uso previsto la cual solo se llenara en "Despachos" y en caso de "ingresos" en esos campos que se usa solo se mostrara en blanco sin poder editarlo o ni nada. cuando se llene en "despachos" recien tambien se autocompletara para "ingresos" lo que se puso.
+5. ese "Ticket/registro" sera usado como una especie de ID de cada material segun se añada, cuando tenga como 5 proyectos talvez este en RGTR-0032 por ejemplo, y ese ID es unico para cada lote de material, ya que ese mismo lote de material se tendra ese ID tanto en Ingresos como en Despachos, solo que ingresos y despachos registran una parte de cada material nove, en "ingresos" se inicia como se adquieren los materiales y en "Despacho" se finaliza el registro del mismos materiales: cuanto se uso, cuanto sobro y para que fue o era planeado esos materiales.
+en si seria: Nro. Registro(como nombre) y RGTR-AAAA-XXXX(XXXX: como numero de registro de cada lote de material y AAAA: como numero de año que se registro ej: 2026).
+6. eso de proveedores cuando este registrando un RGTR: en cada lote tendra su propio proveedor(porque puede ser diferente aveces) y en "Ingresos(LOTES)" al mostrar en detalles de lotes cada uno de los lotes tendra su campo de proveedor ya que como te dije puede ser diferente de cada material.
+7. si es correcto pero la diferencia es que en "Ingresos" no se mostraba esos datos, ni en "Despachos" se mostraba datos de "ingresos" asi que para se entienda y se use mejor pondremos mas campos, no importa si no se llena o este en blanco solo quiero ver ahi los datos necesarios para saber como anda cada RGTR, cada lote y material.
+ya te respondi, ahora tienes mas dudas? antes de modificar el proyecto?
+
+----------------------------------------------------------------------------------------------------------
+Aquí me preguntaste algunas cosas mas que no te deje del todo claro y te respondi:
+
+Gracias, con tus respuestas entiendo mucho mejor. Pero tengo 4 preguntas más antes de redactar el plan completo:
+Pregunta 1: Fecha del Proyecto vs Fecha del Lote/Ingreso
+Dices que el proyecto tiene una sola fecha (no inicio ni fin). Cuando registras un Ingreso (Lote) de un material, ¿ese ingreso tiene su propia fecha de registro (ej: hoy 22/05/2026 que registras el lote) o usas la fecha del proyecto?
+Es decir: en detalle_ingresos (lotes), ¿necesitamos guardar nuestra propia fecha separada de la del proyecto, o la fecha_adquirida del ingreso actual ya cumple esa función?
+Pregunta 2: Formato ODC
+Entendí que el formato ODC es algo como:
+XX/XXXX/ODC/XXX/ÑÑ donde ÑÑ = los dos últimos dígitos del año
+Pero no me queda claro qué significan las demás partes (XX, XXXX, XXX). ¿Podrías darme un ejemplo concreto con números reales? Ejemplo: ??/????/ODC/???/26 → ¿cómo se vería completado?
+Pregunta 3: Proveedor en el Detalle de Lotes (despliegue expandido)
+Confirmas que cada fila/material puede tener proveedor diferente. Cuando en la lista de ingresos se despliega el "Detalle de lotes generados", ¿mostramos UN proveedor (el de la fila 1), o concatenamos/varios si son distintos?
+Pregunta 4: Formato RGTR para Ingresos vs Despachos
+Dices que el RGTR-YYYY-XXXX es por cada lote de material y se comparte en Ingresos y Despachos. Si registro un ingreso con 3 materiales (3 lotes), ¿sería:
+- Opción A: RGTR-2026-0001, RGTR-2026-0002, RGTR-2026-0003 (cada lote = 1 número secuencial)
+- Opción B: RGTR-2026-0001 tiene 3 lotes internos, todos el mismo RGTR (1 ingreso = 1 RGTR con sublotes)
+¿Cuál se acerca más a lo que necesitan?
+Con estas 4 respuestas ya puedo redactar el plan completo de modificación. Después te lo muestro para tu aprobación antes de tocar cualquier cosa en el código.
+▣  Plan · MiniMax-M2.7 · 11m 33s
+
+Respuestas:
+Pregunta 1: si gracias por ese detallito, esa fecha del proyecto sera mas usada, pero en el caso de fechas para cada lote esta bien esa idea asi que si podria tener ese campo de tener propia fecha(por defecto un dia mismo, pero igual sera editable si queremos).
+Pregunta 2: sobre ese formato XX/XXXX/ODC/XXX/ÑÑ los campos de (XX, XXXX, XXX) tampoco me dijeron que significaba pero se los pondre por si acaso, seguro son combinaciones de ellos, pero se lo dejaremos asi ya que asi ellos pondran su propio formato de ODC y si luego me dicen que tienen una secuencia o formato te lo are saber para modificarlo, pero por el momento solo dejalo para que se pueda ingresar en las "X" numeros o letras Mayusculas.
+Pregunta 3: eso de la fila proveedor lo mostraremos un proveedor por cada fila o lote, al registrar un lote en "Registrar Ingreso de almacen" como se ingresara un proveedor por cada lote, de la misma manera mostraremos con cada lote que proveedor se registro asi sean varios repetidos consecutivamente.
+Pregunta 4: me hiciste pensar en esta decision, tenia pensado hacerlo como la opcion B, pero me ire por la opcion ya que quiero que cada lote tenga su id y si tiene uno repetido puede que haiga conflictos de datos o confundimiento, asi que me voy por la opcin A para tener asi varios registros unicos.
+tienes mas preguntas o dudas para el proyecto?
+
+----------------------------------------------------------------------------------------------------------
+Aquí me pediste confimacion lo que ya entendiste:
+
+Perfecto, con todas tus respuestas ya tengo el panorama completo. No tengo más preguntas.
+Antes de redactar el plan, quiero confirmar algo rápido:
+✅ Lo que entendí correctamente:
+Proyectos:
+- Un solo campo fecha (no inicio/fin), editable, default=hoy
+- Nombre libre, ubicación, encargado, estado
+Lotes (detalle_ingresos):
+- Cada fila/material = 1 lote = 1 RGTR único → RGTR-2026-0001, RGTR-2026-0002, etc.
+- Tiene su propia fecha_lote (default=hoy, editable)
+- El ODC es texto libre (letras mayúsculas y números)
+- Cada lote tiene su propio proveedor
+- Campo acciones_planificadas vacío en ingresos, se llena desde despachos
+Flujo:
+- Ingresos = registra adquisición (proveedor, cantidad, quién recibe)
+- Despachos = registra consumo (cuánto se usó, para qué, stock en planta)
+- El mismo RGTR aparece en ambos lados del sistema, mostrando el ciclo completo
+¿Está correcto todo esto?
+Si sí, procedo a redactar el Plan de Modificación Completo con todos los cambios en:
+1. Base de datos (migraciones y modelo)
+2. Backend (controladores y lógica)
+3. Frontend (Vues: Ingresos, Despachos, Proyectos, Kardex)
+4. Rutas y permisos
+¿Confirmas que puedo proceder con el plan?
+▣  Plan · MiniMax-M2.7 · 1m 14s
+si esta bien, ahora si comencemos a mejorar el sistema
+
+----------------------------------------------------------------------------------------------------------
+Este era tu plan de ejecuciones me parece:
+
+
+Todo
+[✓] Modificar migración de proyectos: reemplazar fecha_inicio/fecha_fin por única fecha
+[✓] Agregar campos a detalle_ingresos: nro_registro (RGTR), fecha_lote, acciones_planificadas
+[✓] Actualizar modelos: Proyecto, DetalleIngreso, Ingreso, Salida
+[✓] Reescribir IngresoController para lógica de RGTR y lotes
+[✓] Reescribir SalidaController para flujo de despachos
+[•] Reescribir Ingresos/Index.vue - lista y detalle de lotes
+[ ] Reescribir Ingresos/Create.vue - formulario de registro
+[ ] Reescribir Salidas/Index.vue - lista de despachos
+[ ] Reescribir Salidas/Create.vue - formulario de despacho
+[ ] Actualizar Kardex.vue para nuevos campos
+[ ] Actualizar Dashboard.vue y otros componentes
+[ ] Actualizar DatabaseSeeder con nuevos datos de prueba
+[ ] Verificar pruebas automatizadas y funcionales
+Modified Files
+app/Http/Controllers/BitacoraController.php+40
+app/Http/Controllers/IngresoController.php+97-39
+app/Http/Controllers/MaterialController.php+34-2
+app/Http/Controllers/PermisoController.php+84
+app/Http/Controllers/ProyectoController.php+33-20
+app/Http/Controllers/ReporteController.php+17
+app/Http/Controllers/SalidaController.php+142-99
+app/Http/Middleware/HandleInertiaRequests.php+28-1
+app/Http/Middleware/PermissionMiddleware.php+45
+app/Models/BitacoraActividad.php+26
+app/Models/DetalleIngreso.php+46
+app/Models/Material.php+1
+app/Models/Proyecto.php+1-2
+app/Models/RolePermission.php+15
+app/Models/Salida.php+1
+bootstrap/app.php+1
+database/migrations/2026_05_20_042129_create_proyectos_table.php+1-2
+database/migrations/2026_05_20_042132_create_salidas_table.php+1
+database/migrations/2026_05_22_000001_create_role_permissions_table.php+32
+database/migrations/2026_05_22_000002_create_bitacora_actividades_table.php+31
+database/migrations/2026_05_22_000003_add_codigo_interno_to_materials_table.php+28
+database/migrations/2026_05_22_000004_add_rgtr_fields_to_detalle_ingresos_table.php+31
+database/seeders/DatabaseSeeder.php+405-53
+doc/analisis_inicial.md+87
+doc/control_tareas.md+147
+doc/preinforme_planta_asfalto.md+198
+doc/prompts detallados.txt.txt+14
+doc/referencias/inventario (1).pdf
+resources/js/Layouts/AuthenticatedLayout.vue+54-16
+resources/js/Pages/Bitacora/Index.vue+147
+resources/js/Pages/Ingresos/Create.vue+123-128
+resources/js/Pages/Ingresos/Index.vue+106-102
+resources/js/Pages/Materials/Index.vue+18-1
+resources/js/Pages/Permisos/Index.vue+141
+resources/js/Pages/Reportes/Kardex.vue+358-11
+resources/js/Pages/Salidas/Create.vue+1-1
+routes/web.php+52-24
+tests/Feature/PepsAlgorithmTest.php+23-5
+tests/Feature/PermissionMiddlewareTe+103
+

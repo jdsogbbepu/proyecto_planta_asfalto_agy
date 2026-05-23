@@ -16,197 +16,210 @@ use Inertia\Inertia;
 
 class SalidaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
+        $salidas = Salida::with([
+            'funcionario',
+            'proyecto',
+            'usuario',
+            'detalles.detalleIngreso.material.medida',
+            'detalles.detalleIngreso.proveedor',
+        ])
+            ->latest()
+            ->get()
+            ->map(function ($salida) {
+                $lotes = $salida->detalles->map(function ($detalleSalida) {
+                    $lote = $detalleSalida->detalleIngreso;
+                    $cantidadUtilizada = (float) $lote->detallesSalida->sum('cantidad_salida');
+                    $stockPlanta = (float) $lote->cantidad_adquirida - $cantidadUtilizada;
+                    $estadoLote = $stockPlanta <= 0 ? 'AGOTADO' : ($stockPlanta < (float) $lote->cantidad_adquirida ? 'PARCIAL' : 'COMPLETO');
+
+                    return [
+                        'id' => $lote->id,
+                        'nro_registro' => $lote->nro_registro,
+                        'id_material' => $lote->id_material,
+                        'material_nombre' => $lote->material?->nombre,
+                        'unidad' => $lote->material?->medida?->abreviacion,
+                        'id_proyecto' => $lote->id_proyecto,
+                        'proyecto_nombre' => $lote->proyecto?->nombre,
+                        'fecha_lote' => $lote->fecha_lote?->format('Y-m-d'),
+                        'odc' => $lote->ingreso?->odc,
+                        'cantidad_adquirida' => (float) $lote->cantidad_adquirida,
+                        'cantidad_utilizada' => $cantidadUtilizada,
+                        'stock_planta' => $stockPlanta,
+                        'estado_lote' => $estadoLote,
+                        'acciones_planificadas' => $lote->acciones_planificadas,
+                        'proveedor_nombre' => $lote->proveedor?->razon_social,
+                        'cantidad_salida' => (float) $detalleSalida->cantidad_salida,
+                    ];
+                });
+
+                return [
+                    'id' => $salida->id,
+                    'odc' => $salida->odc,
+                    'fecha_salida' => $salida->fecha_salida,
+                    'uso' => $salida->uso,
+                    'observaciones' => $salida->observaciones,
+                    'registrado_por' => $salida->usuario?->name,
+                    'fecha_registro' => $salida->created_at?->format('Y-m-d H:i'),
+                    'funcionario_nombre' => $salida->funcionario?->nombre,
+                    'funcionario_cargo' => $salida->funcionario?->cargo,
+                    'proyecto_nombre' => $salida->proyecto?->nombre,
+                    'lotes' => $lotes,
+                    'nro_lotes' => $lotes->count(),
+                ];
+            });
+
         return Inertia::render('Salidas/Index', [
-            'salidas' => Salida::with(['funcionario', 'proyecto', 'usuario', 'detalles.detalleIngreso.material.medida'])
-                ->latest()
-                ->get()
+            'salidas' => $salidas,
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        // Calculate available stock for each material in each project
-        $stocksPorProyecto = DB::table('detalle_ingresos')
-            ->join('materials', 'detalle_ingresos.id_material', '=', 'materials.id')
-            ->select(
-                'detalle_ingresos.id_proyecto',
-                'detalle_ingresos.id_material',
-                DB::raw('SUM(detalle_ingresos.cantidad_actual_lote) as stock_disponible')
-            )
-            ->groupBy('detalle_ingresos.id_proyecto', 'detalle_ingresos.id_material')
-            ->having('stock_disponible', '>', 0)
-            ->get()
-            ->map(function ($stock) {
-                $stock->stock_disponible = (float) $stock->stock_disponible;
-                return $stock;
-            });
-
         return Inertia::render('Salidas/Create', [
             'funcionarios' => Funcionario::where('activo', true)->orderBy('nombre')->get(),
             'proyectos' => Proyecto::where('estado', 'activo')->orderBy('nombre')->get(),
             'materials' => Material::with('medida')->orderBy('nombre')->get(),
-            'stocksPorProyecto' => $stocksPorProyecto,
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    public function getLotesPorProyecto(Request $request)
+    {
+        $request->validate(['id_proyecto' => 'required|exists:proyectos,id']);
+
+        $lotes = DetalleIngreso::with(['material.medida', 'proveedor', 'proyecto'])
+            ->where('id_proyecto', $request->id_proyecto)
+            ->where('cantidad_actual_lote', '>', 0)
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->map(function ($lote) {
+                $cantidadUtilizada = (float) $lote->detallesSalida->sum('cantidad_salida');
+                $stockPlanta = (float) $lote->cantidad_actual_lote;
+
+                return [
+                    'id' => $lote->id,
+                    'nro_registro' => $lote->nro_registro,
+                    'id_material' => $lote->id_material,
+                    'material_nombre' => $lote->material?->nombre,
+                    'unidad' => $lote->material?->medida?->abreviacion,
+                    'id_proveedor' => $lote->id_proveedor,
+                    'proveedor_nombre' => $lote->proveedor?->razon_social,
+                    'fecha_lote' => $lote->fecha_lote?->format('Y-m-d'),
+                    'cantidad_adquirida' => (float) $lote->cantidad_adquirida,
+                    'stock_disponible' => $stockPlanta,
+                    'cantidad_utilizada' => $cantidadUtilizada,
+                    'stock_planta' => $stockPlanta,
+                    'estado_lote' => $stockPlanta <= 0 ? 'AGOTADO' : ($stockPlanta < (float) $lote->cantidad_adquirida ? 'PARCIAL' : 'COMPLETO'),
+                    'acciones_planificadas' => $lote->acciones_planificadas,
+                ];
+            });
+
+        return response()->json($lotes);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
             'id_funcionario' => ['required', 'exists:funcionarios,id'],
             'id_proyecto' => ['required', 'exists:proyectos,id'],
-            'uso' => ['required', 'string', 'max:255'],
+            'odc' => ['nullable', 'string', 'max:50', 'regex:/^[A-Z0-9\/]+$/'],
+            'uso' => ['nullable', 'string', 'max:255'],
+            'observaciones' => ['nullable', 'string'],
             'fecha_salida' => ['required', 'date'],
             'items' => ['required', 'array', 'min:1'],
-            'items.*.id_material' => ['required', 'exists:materials,id'],
-            'items.*.cantidad' => ['required', 'numeric', 'gt:0'],
+            'items.*.id_detalle_ingreso' => ['required', 'exists:detalle_ingresos,id'],
+            'items.*.cantidad_salida' => ['required', 'numeric', 'gt:0'],
+            'items.*.acciones_planificadas' => ['nullable', 'string', 'max:255'],
         ]);
 
         DB::beginTransaction();
 
         try {
-            // Create core dispatch record
             $salida = Salida::create([
                 'id_funcionario' => $validated['id_funcionario'],
                 'id_proyecto' => $validated['id_proyecto'],
                 'id_usuario' => auth()->id(),
-                'uso' => $validated['uso'],
+                'odc' => $validated['odc'] ?? null,
+                'uso' => $validated['uso'] ?? null,
                 'fecha_salida' => $validated['fecha_salida'],
             ]);
 
             $resumenItems = [];
+
             foreach ($validated['items'] as $item) {
-                $materialId = $item['id_material'];
-                $cantSolicitada = (float) $item['cantidad'];
-                $proyectoId = $validated['id_proyecto'];
+                $lote = DetalleIngreso::lockForUpdate()->find($item['id_detalle_ingreso']);
 
-                // 1. Verify total available stock for this material and project
-                $totalDisponible = (float) DetalleIngreso::where('id_material', $materialId)
-                     ->where('id_proyecto', $proyectoId)
-                     ->sum('cantidad_actual_lote');
-
-                if ($cantSolicitada > $totalDisponible) {
-                    throw new \Exception("Stock insuficiente. El material solicitado no cuenta con saldo disponible suficiente en este proyecto. Solicitado: {$cantSolicitada}, Disponible: {$totalDisponible}");
+                if (!$lote) {
+                    throw new \Exception("Lote no encontrado.");
                 }
 
-                // 2. Query active batches/lotes ordered chronologically (FIFO/PEPS)
-                $lotes = DetalleIngreso::where('id_material', $materialId)
-                    ->where('id_proyecto', $proyectoId)
-                    ->where('cantidad_actual_lote', '>', 0)
-                    ->orderBy('created_at', 'asc')
-                    ->orderBy('id', 'asc')
-                    ->lockForUpdate() // Lock rows to prevent race conditions
-                    ->get();
+                $cantSolicitada = (float) $item['cantidad_salida'];
 
-                $restante = $cantSolicitada;
-
-                foreach ($lotes as $lote) {
-                    if ($restante <= 0) {
-                        break;
-                    }
-
-                    $saldoLote = (float) $lote->cantidad_actual_lote;
-
-                    if ($restante >= $saldoLote) {
-                        // Consume entire batch
-                        DetalleSalida::create([
-                            'id_salida' => $salida->id,
-                            'id_detalle_ingreso' => $lote->id,
-                            'cantidad_salida' => $saldoLote,
-                        ]);
-
-                        $lote->update(['cantidad_actual_lote' => 0]);
-                        $restante -= $saldoLote;
-                    } else {
-                        // Consume partial batch
-                        DetalleSalida::create([
-                            'id_salida' => $salida->id,
-                            'id_detalle_ingreso' => $lote->id,
-                            'cantidad_salida' => $restante,
-                        ]);
-
-                        $lote->update(['cantidad_actual_lote' => $saldoLote - $restante]);
-                        $restante = 0;
-                    }
+                if ($cantSolicitada > (float) $lote->cantidad_actual_lote) {
+                    throw new \Exception("Stock insuficiente para lote {$lote->nro_registro}. Solicitado: {$cantSolicitada}, Disponible: {$lote->cantidad_actual_lote}");
                 }
 
-                if ($restante > 0) {
-                    throw new \Exception("Error crítico al procesar PEPS. No se pudieron consumir todas las unidades solicitadas.");
-                }
+                DetalleSalida::create([
+                    'id_salida' => $salida->id,
+                    'id_detalle_ingreso' => $lote->id,
+                    'cantidad_salida' => $cantSolicitada,
+                ]);
 
-                $material = Material::find($materialId);
-                $resumenItems[] = "{$cantSolicitada} de '{$material->nombre}'";
+                $lote->update([
+                    'cantidad_actual_lote' => (float) $lote->cantidad_actual_lote - $cantSolicitada,
+                    'acciones_planificadas' => $item['acciones_planificadas'] ?? null,
+                ]);
+
+                $resumenItems[] = "{$lote->nro_registro}: {$cantSolicitada} {$lote->material?->nombre}";
             }
 
-            // Registrar en bitácora
-            $proyecto = Proyecto::find($validated['id_proyecto']);
-            $funcionario = Funcionario::find($validated['id_funcionario']);
-            $detalleBitacora = "Se registró despacho ID: {$salida->id} para la obra '{$proyecto->nombre}', entregado a '{$funcionario->nombre}'. Uso: {$salida->uso}. Items: " . implode(', ', $resumenItems);
-            
             BitacoraActividad::create([
                 'id_usuario' => Auth::id(),
-                'accion' => 'Registro de Despacho',
-                'detalle' => $detalleBitacora,
+                'accion' => 'Registro de Despacho (PEPS)',
+                'detalle' => "Despacho ID {$salida->id}, ODC: " . ($validated['odc'] ?? 'N/A') . ". " . implode('; ', $resumenItems),
                 'ip_address' => $request->ip(),
             ]);
 
             DB::commit();
 
-            return redirect()->route('despachos.index')->with('success', 'Despacho registrado correctamente aplicando lógica PEPS.');
+            return redirect()->route('despachos.index')->with('success', 'Despacho registrado correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Error al procesar el despacho: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al procesar el despacho: ' . $e->getMessage())->withInput();
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Request $request, Salida $salida)
     {
-        // Deleting a dispatch reverts the consumed stocks back to their corresponding batches!
         DB::beginTransaction();
 
         try {
-            $id = $salida->id;
-            $proyectoNombre = $salida->proyecto->nombre;
-            $funcionarioNombre = $salida->funcionario->nombre;
-
             foreach ($salida->detalles as $detalleSalida) {
                 $lote = DetalleIngreso::find($detalleSalida->id_detalle_ingreso);
                 if ($lote) {
-                    // Revert stock to the batch
                     $lote->update([
-                        'cantidad_actual_lote' => (float) $lote->cantidad_actual_lote + (float) $detalleSalida->cantidad_salida
+                        'cantidad_actual_lote' => (float) $lote->cantidad_actual_lote + (float) $detalleSalida->cantidad_salida,
                     ]);
                 }
             }
 
-            $salida->delete(); // Cascades on database for details
+            $lotesInfo = $salida->detalles->map(fn($d) => $d->detalleIngreso?->nro_registro)->toArray();
 
-            // Registrar en bitácora
+            $salida->delete();
+
             BitacoraActividad::create([
                 'id_usuario' => Auth::id(),
                 'accion' => 'Reversión de Despacho',
-                'detalle' => "Se revirtió (eliminó) el despacho ID: {$id} que fue destinado a '{$proyectoNombre}', retirado por '{$funcionarioNombre}'. Los lotes de ingreso fueron restaurados.",
+                'detalle' => 'Se eliminó despacho ID ' . $salida->id . '. Lotes afectados: ' . implode(', ', $lotesInfo),
                 'ip_address' => $request->ip(),
             ]);
 
             DB::commit();
-            return redirect()->route('despachos.index')->with('success', 'Despacho revertido correctamente. Los saldos de los lotes fueron restaurados.');
+            return redirect()->route('despachos.index')->with('success', 'Despacho revertido. Los saldos fueron restaurados.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('despachos.index')->with('error', 'Error al revertir el despacho: ' . $e->getMessage());
+            return redirect()->route('despachos.index')->with('error', 'Error al revertir: ' . $e->getMessage());
         }
     }
 }

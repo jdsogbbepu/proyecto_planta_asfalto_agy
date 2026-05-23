@@ -31,19 +31,25 @@ class ReporteController extends Controller
 
         if ($selectedProyectoId && $selectedMaterialId) {
             // 1. Fetch all batches for the filtered combination
-            $lotes = DetalleIngreso::with(['ingreso.usuario', 'ingreso.proveedor'])
+            $lotes = DetalleIngreso::with(['proveedor'])
                 ->where('id_proyecto', $selectedProyectoId)
                 ->where('id_material', $selectedMaterialId)
                 ->orderBy('created_at', 'asc')
                 ->get()
                 ->map(function ($lote) {
-                    $lote->cantidad_adquirida = (float) $lote->cantidad_adquirida;
-                    $lote->cantidad_actual_lote = (float) $lote->cantidad_actual_lote;
-                    return $lote;
+                    return [
+                        'id' => $lote->id,
+                        'nro_registro' => $lote->nro_registro,
+                        'fecha_lote' => $lote->fecha_lote?->format('Y-m-d'),
+                        'cantidad_adquirida' => (float) $lote->cantidad_adquirida,
+                        'cantidad_actual_lote' => (float) $lote->cantidad_actual_lote,
+                        'proveedor_nombre' => $lote->proveedor?->razon_social,
+                        'acciones_planificadas' => $lote->acciones_planificadas,
+                    ];
                 });
 
             // 2. Fetch all ingress events
-            $ingresos = DetalleIngreso::with(['ingreso.usuario', 'ingreso.proveedor'])
+            $ingresos = DetalleIngreso::with(['proveedor'])
                 ->where('id_proyecto', $selectedProyectoId)
                 ->where('id_material', $selectedMaterialId)
                 ->get()
@@ -52,8 +58,8 @@ class ReporteController extends Controller
                         'fecha' => $det->created_at->format('Y-m-d H:i'),
                         'timestamp' => $det->created_at->timestamp,
                         'tipo' => 'INGRESO',
-                        'documento' => 'Ticket ' . ($det->ingreso->nro_ticket ?? 'S/N'),
-                        'auxiliar' => $det->ingreso->proveedor->razon_social ?? 'S/P',
+                        'documento' => $det->nro_registro ?? 'S/N',
+                        'auxiliar' => $det->proveedor?->razon_social ?? 'S/P',
                         'cantidad_in' => (float) $det->cantidad_adquirida,
                         'cantidad_out' => 0,
                     ];

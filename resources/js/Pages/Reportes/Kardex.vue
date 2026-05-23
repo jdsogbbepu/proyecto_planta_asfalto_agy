@@ -252,7 +252,7 @@ const handlePrint = () => {
                             class="bg-[#0e1113] border border-[#2d3139] rounded-lg p-3"
                         >
                             <div class="flex justify-between items-center mb-2">
-                                <span class="font-mono text-xs font-bold text-[#f27b00]">LOTE-{{ String(lote.id).padStart(5, '0') }}</span>
+                                <span class="font-mono text-xs font-bold text-[#f27b00]">{{ lote.nro_registro || 'LOTE-' + String(lote.id).padStart(5, '0') }}</span>
                                 <span 
                                     class="text-[9px] font-bold px-1.5 py-0.2 rounded"
                                     :class="{
@@ -266,8 +266,8 @@ const handlePrint = () => {
                             </div>
 
                             <div class="grid grid-cols-2 gap-2 text-xs font-mono mb-2">
-                                <div class="text-industrial-muted">Ticket: <span class="text-white">{{ lote.ingreso?.nro_ticket || 'S/N' }}</span></div>
-                                <div class="text-industrial-muted text-right">Fecha: <span class="text-white">{{ lote.ingreso?.fecha_adquirida }}</span></div>
+                                <div class="text-industrial-muted">Fecha: <span class="text-white">{{ lote.fecha_lote }}</span></div>
+                                <div class="text-industrial-muted text-right">Proveedor: <span class="text-white">{{ lote.proveedor_nombre || 'N/A' }}</span></div>
                             </div>
 
                             <div class="w-full bg-[#1b1e22] rounded-full h-1.5 border border-[#2d3139] mb-2 overflow-hidden">
@@ -278,9 +278,13 @@ const handlePrint = () => {
                                 ></div>
                             </div>
 
-                            <div class="flex justify-between text-[11px] font-mono">
+                            <div class="flex justify-between text-[11px] font-mono mb-1">
                                 <span class="text-industrial-muted">Inicial: {{ Number(lote.cantidad_adquirida).toLocaleString() }} {{ getSelectedMaterialUnit() }}</span>
                                 <span class="text-white font-bold">Saldo: {{ Number(lote.cantidad_actual_lote).toLocaleString() }} {{ getSelectedMaterialUnit() }}</span>
+                            </div>
+
+                            <div v-if="lote.acciones_planificadas" class="text-[10px] text-industrial-muted mt-1 border-t border-[#2d3139] pt-1">
+                                <span class="font-semibold">Acciones:</span> {{ lote.acciones_planificadas }}
                             </div>
                         </div>
 
