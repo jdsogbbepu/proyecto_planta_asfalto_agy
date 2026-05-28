@@ -189,3 +189,18 @@ routes/web.php+52-24
 tests/Feature/PepsAlgorithmTest.php+23-5
 tests/Feature/PermissionMiddlewareTe+103
 
+------------------------------SALIDAS------------------------------
+ok ahora trabajaremos con el complemento, ya esta para crear "proyectos", ya esta "INGRESOS(LOTES)", pero aun falta actualizar el "DESPACHOS(PEPS)" para que se controle bien un proyecto.
+primero actualizaremos: "DESPACHOS(PEPS) -Registro Salida / Despacho (PEPS)": donde hay 2 puntos(1. Informacion de la entrega y destino y 2. Lotes Disponibles para Despacho) ahora seran(1. Informacion del Proyecto Relacionado. y 2.Registro de salidas del proyecto):
+en el "1. Informacion del Proyecto Relacionado" tendra:
+- esta bien como esta el "Proyecto / obra municipal destino",
+- "Fecha": se sobreescribira con lo que estaba registrado el proyecto elegido.
+- "ODC": este campo ya no estara en blanco, se sobreescribira con el codigo con lo que se registraron en "INGRESOS(LOTES)", se podra editar si quieren.
+-"Funcionario receptor": esta bien como esta, no se cambiara nada.
+- "Observaciones de ingresos": aqui se sobre escribira las observaciones que se puso en "DESPACHOS(LOTES)".
+- "Observaciones de salida": aqui ser despues por si hay una novedad o algo que sucedio en esta etapa de salidas.
+2.Registro de salidas del proyecto: aqui se copiara algunas cosas que en su mayoria sera de mostrar y no editar, en esta parte se mostrara todos los ingresos de materiales y lotes que se registraron previamente en "INGRESOS(LOTES)" y esos datos se mostraran de forma ordenada asi(por columnas):
+- Nro de RGTR - Nro de lote - material - Fecha - Unidad - cantidad adquirida - cantidad utilizada - Stock en planta - acciones planificadas para su uso 
+de esa forma sera la tabla para mostrar los datos del proyecto seleccionado(materiales y/o lotes).
+- lo unico que quiero que se ingrese sera en "cantidad utilizada", "acciones planificadas para su uso" y "Stock en planta"(se calculara con una operacion de "Cant adquirida" - "cant utilizada" = Stock en planta(residuo)).
+-todos los demas datos se mostraran y sobreescribiran(no se podran editar) segun los datos que se llenaron anteriormente de cada proyecto en"INGRESOS(LOTES)".
