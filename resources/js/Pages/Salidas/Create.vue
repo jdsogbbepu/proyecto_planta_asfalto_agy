@@ -1,7 +1,8 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
+import axios from 'axios';
 
 const props = defineProps({
     funcionarios: { type: Array, required: true },
@@ -25,12 +26,13 @@ const form = useForm({
     id_proyecto: '',
     odc: '',
     uso: '',
-    observaciones: '',
+    observaciones: '', // Observaciones de salida (el nuevo campo)
     fecha_salida: getTodayDate(),
     items: [],
 });
 
 const lotesDisponibles = ref([]);
+const obsIngreso = ref(''); // Observaciones traídas del ingreso
 
 const getSelectedProyectoFecha = () => {
     const proj = props.proyectos.find(p => p.id === Number(selectedProyectoId.value));
@@ -42,6 +44,8 @@ const onProyectoChange = () => {
     form.fecha_salida = headerFecha.value;
     form.id_proyecto = selectedProyectoId.value;
     form.items = [];
+    form.odc = '';
+    obsIngreso.value = '';
     fetchLotes();
 };
 
@@ -51,12 +55,19 @@ const fetchLotes = async () => {
         return;
     }
     try {
-        const response = await fetch(`/despachos/lotes/${selectedProyectoId.value}`);
-        const data = await response.json();
-        lotesDisponibles.value = data.map(lote => ({
+        // Usamos una URL directa en lugar de route() en el script setup para evitar ReferenceErrors
+        const response = await axios.get('/despachos/lotes/' + selectedProyectoId.value);
+        const data = response.data;
+        
+        // Autocompletar cabecera con el último ingreso
+        if (data.odc_ingreso) form.odc = data.odc_ingreso;
+        if (data.observaciones_ingreso) obsIngreso.value = data.observaciones_ingreso;
+
+        lotesDisponibles.value = data.lotes.map(lote => ({
             ...lote,
             selected: false,
-            cantidad_salida: 0,
+            // Esta cantidad_salida representa lo que se va a sumar a la cantidad_utilizada en este despacho
+            cantidad_salida: 0, 
             acciones_planificadas: lote.acciones_planificadas || '',
         }));
     } catch (error) {
@@ -70,13 +81,16 @@ const selectedLotesCount = computed(() => lotesDisponibles.value.filter(l => l.s
 const toggleLote = (lote) => {
     lote.selected = !lote.selected;
     if (lote.selected && lote.cantidad_salida <= 0) {
-        lote.cantidad_salida = Math.min(1, lote.stock_disponible);
+        // Por defecto, si seleccionan, asumen que usarán todo el stock restante
+        lote.cantidad_salida = Math.max(0, lote.stock_planta);
+    } else if (!lote.selected) {
+        lote.cantidad_salida = 0;
     }
 };
 
 const isLoteValid = (lote) => {
     if (!lote.selected) return true;
-    return lote.cantidad_salida > 0 && lote.cantidad_salida <= lote.stock_disponible;
+    return lote.cantidad_salida > 0 && lote.cantidad_salida <= lote.stock_planta;
 };
 
 const isFormInvalid = computed(() => {
@@ -97,7 +111,7 @@ const submitForm = () => {
             cantidad_salida: l.cantidad_salida,
             acciones_planificadas: l.acciones_planificadas || null,
         }));
-    form.post(route('despachos.store'));
+    form.post('/despachos');
 };
 </script>
 
@@ -114,19 +128,19 @@ const submitForm = () => {
                 </Link>
                 <div>
                     <h2 class="text-2xl font-bold tracking-tight text-white">Registrar Salida / Despacho (PEPS)</h2>
-                    <p class="text-sm text-industrial-muted mt-1">Despacho de materiales a obras municipales con deducción PEPS.</p>
+                    <p class="text-sm text-industrial-muted mt-1">Conciliación de consumos y saldos de materiales por proyecto.</p>
                 </div>
             </div>
         </template>
 
-        <div class="py-6 px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl font-sans">
+        <div class="py-6 px-4 sm:px-6 lg:px-8 mx-auto max-w-full 2xl:max-w-screen-2xl font-sans">
             <form @submit.prevent="submitForm" class="space-y-6">
                 <div class="bg-[#1b1e22] border border-[#2d3139] rounded-xl p-6 shadow-xl">
                     <h3 class="text-base font-bold text-white tracking-tight mb-4 border-b border-[#2d3139] pb-2">
-                        1. Información de la Entrega y Destino
+                        1. Información del Proyecto Relacionado
                     </h3>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div>
                             <label class="block text-xs font-semibold text-industrial-muted uppercase tracking-wider mb-2">Proyecto / Obra Municipal Destino</label>
                             <select
@@ -143,7 +157,7 @@ const submitForm = () => {
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-industrial-muted uppercase tracking-wider mb-2">Fecha de Salida</label>
+                            <label class="block text-xs font-semibold text-industrial-muted uppercase tracking-wider mb-2">Fecha (Proyecto)</label>
                             <input
                                 type="date"
                                 class="w-full bg-[#0e1113] text-[#e1e6eb] border border-[#2d3139] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#f27b00] font-mono"
@@ -158,17 +172,15 @@ const submitForm = () => {
                                 class="w-full bg-[#0e1113] text-[#e1e6eb] border border-[#2d3139] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#f27b00] font-mono uppercase"
                                 v-model="form.odc"
                                 placeholder="XX/XXXX/ODC/XXX/YY"
-                                maxlength="50"
                             />
                         </div>
-                    </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                         <div>
                             <label class="block text-xs font-semibold text-industrial-muted uppercase tracking-wider mb-2">Funcionario Receptor</label>
                             <select
                                 class="w-full bg-[#0e1113] text-[#e1e6eb] border border-[#2d3139] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#f27b00]"
                                 v-model="form.id_funcionario"
+                                required
                             >
                                 <option value="">-- Seleccionar --</option>
                                 <option v-for="func in funcionarios" :key="func.id" :value="func.id">
@@ -176,59 +188,63 @@ const submitForm = () => {
                                 </option>
                             </select>
                         </div>
+                    </div>
 
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                         <div>
-                            <label class="block text-xs font-semibold text-industrial-muted uppercase tracking-wider mb-2">Destino de Uso</label>
+                            <label class="block text-xs font-semibold text-industrial-muted uppercase tracking-wider mb-2">Observaciones de Ingresos</label>
+                            <input
+                                type="text"
+                                class="w-full bg-[#0e1113]/50 text-[#8b949e] border border-[#2d3139] rounded-lg px-4 py-2.5 text-sm focus:outline-none cursor-not-allowed"
+                                :value="obsIngreso"
+                                readonly
+                                placeholder="Se autocompletará con las observaciones del ingreso..."
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-industrial-muted uppercase tracking-wider mb-2">Observaciones de Salida</label>
                             <input
                                 type="text"
                                 class="w-full bg-[#0e1113] text-[#e1e6eb] border border-[#2d3139] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#f27b00]"
-                                v-model="form.uso"
-                                placeholder="Ej. Capa de rodadura tramo 0+000 a 0+500"
+                                v-model="form.observaciones"
+                                placeholder="Novedades en la etapa de salidas..."
                             />
                         </div>
-                    </div>
-
-                    <div class="mt-4">
-                        <label class="block text-xs font-semibold text-industrial-muted uppercase tracking-wider mb-2">Observaciones</label>
-                        <input
-                            type="text"
-                            class="w-full bg-[#0e1113] text-[#e1e6eb] border border-[#2d3139] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#f27b00]"
-                            v-model="form.observaciones"
-                            placeholder="Observaciones del despacho..."
-                        />
                     </div>
                 </div>
 
                 <div class="bg-[#1b1e22] border border-[#2d3139] rounded-xl p-6 shadow-xl">
                     <div class="flex items-center justify-between border-b border-[#2d3139] pb-3 mb-4">
                         <h3 class="text-base font-bold text-white tracking-tight">
-                            2. Lotes Disponibles para Despacho
+                            2. Registro de Salidas del Proyecto
                         </h3>
-                        <span class="text-xs text-industrial-muted">
-                            {{ selectedLotesCount }} lote(s) seleccionado(s)
+                        <span class="text-xs text-industrial-muted font-bold px-3 py-1 bg-[#2d3139] rounded-full">
+                            {{ selectedLotesCount }} ítem(s) seleccionado(s) para editar
                         </span>
                     </div>
 
                     <div v-if="!selectedProyectoId" class="text-center py-12 text-industrial-muted text-sm bg-[#0e1113]/50 rounded-lg border border-dashed border-[#2d3139]">
-                        Seleccione primero el Proyecto para cargar los lotes disponibles.
+                        Seleccione primero el Proyecto para cargar los materiales.
                     </div>
 
                     <div v-else-if="lotesDisponibles.length === 0" class="text-center py-12 text-industrial-muted text-sm bg-[#0e1113]/50 rounded-lg border border-dashed border-[#2d3139]">
-                        No hay lotes disponibles con stock para este proyecto.
+                        No se encontraron registros de ingreso para este proyecto.
                     </div>
 
-                    <div v-else class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-[#e1e6eb]">
+                    <div v-else class="overflow-x-auto pb-4">
+                        <table class="w-full text-left text-sm text-[#e1e6eb] whitespace-nowrap">
                             <thead class="text-xs text-industrial-muted uppercase bg-[#0e1113] border-b border-[#2d3139]">
                                 <tr>
-                                    <th class="px-3 py-3 font-semibold text-center w-12"></th>
-                                    <th class="px-3 py-3 font-semibold">Nro. Registro</th>
-                                    <th class="px-3 py-3 font-semibold">Material / Insumo</th>
-                                    <th class="px-3 py-3 font-semibold text-center">Und</th>
-                                    <th class="px-3 py-3 font-semibold text-right">Stock Disp.</th>
-                                    <th class="px-3 py-3 font-semibold text-right">Cant. a Usar</th>
-                                    <th class="px-3 py-3 font-semibold">Acciones Planificadas</th>
-                                    <th class="px-3 py-3 font-semibold text-center w-20">Estado</th>
+                                    <th class="px-2 py-3 font-semibold text-center w-10">Sel.</th>
+                                    <th class="px-3 py-3 font-semibold">Nro RGTR</th>
+                                    <th class="px-3 py-3 font-semibold">Nro Lote</th>
+                                    <th class="px-3 py-3 font-semibold">Material</th>
+                                    <th class="px-3 py-3 font-semibold">Fecha (Lote)</th>
+                                    <th class="px-2 py-3 font-semibold text-center">Unidad</th>
+                                    <th class="px-3 py-3 font-semibold text-right">Cant. Adquirida</th>
+                                    <th class="px-3 py-3 font-semibold text-right w-32 bg-[#2d3139]/30 border-l border-[#2d3139]">Cant. Utilizada</th>
+                                    <th class="px-3 py-3 font-semibold text-right">Stock en Planta</th>
+                                    <th class="px-3 py-3 font-semibold min-w-[200px]">Acciones Planificadas</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-[#2d3139]">
@@ -238,62 +254,61 @@ const submitForm = () => {
                                     class="hover:bg-[#1f2329]/10 transition"
                                     :class="{ 'bg-[#f27b00]/5': lote.selected }"
                                 >
-                                    <td class="px-3 py-3 text-center">
+                                    <td class="px-2 py-3 text-center">
                                         <input
                                             type="checkbox"
-                                            class="w-4 h-4 rounded border-[#2d3139] bg-[#0e1113] text-[#f27b00] focus:ring-[#f27b00] focus:ring-offset-0"
+                                            class="w-4 h-4 rounded border-[#2d3139] bg-[#0e1113] text-[#f27b00] focus:ring-[#f27b00] focus:ring-offset-0 cursor-pointer"
                                             v-model="lote.selected"
                                             @change="toggleLote(lote)"
                                         />
                                     </td>
                                     <td class="px-3 py-3 font-mono text-xs font-bold text-[#f27b00]">{{ lote.nro_registro }}</td>
-                                    <td class="px-3 py-3 text-xs font-sans">{{ lote.material_nombre }}</td>
-                                    <td class="px-3 py-3 text-center text-xs text-industrial-muted">{{ lote.unidad }}</td>
+                                    <td class="px-3 py-3 font-mono text-xs text-industrial-muted">LOTE-{{ String(lote.nro_lote).padStart(4, '0') }}</td>
+                                    <td class="px-3 py-3 text-xs font-sans truncate max-w-[150px]" :title="lote.material_nombre">{{ lote.material_nombre }}</td>
+                                    <td class="px-3 py-3 text-xs text-industrial-muted">{{ lote.fecha_lote }}</td>
+                                    <td class="px-2 py-3 text-center text-xs font-bold text-industrial-muted bg-[#0e1113]">{{ lote.unidad }}</td>
                                     <td class="px-3 py-3 text-right font-mono text-xs">
-                                        <span class="text-[#f27b00] font-bold">{{ Number(lote.stock_disponible).toLocaleString() }}</span>
-                                        <span class="text-industrial-muted ml-1">{{ lote.unidad }}</span>
+                                        <span class="text-emerald-400 font-bold">{{ Number(lote.cantidad_adquirida).toLocaleString() }}</span>
                                     </td>
-                                    <td class="px-3 py-3">
-                                        <div class="flex items-center rounded-lg overflow-hidden bg-[#0e1113] border border-[#2d3139]">
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                min="0"
-                                                :max="lote.stock_disponible"
-                                                class="flex-1 bg-transparent text-right text-[#e1e6eb] border-none px-3 py-2 text-sm focus:outline-none focus:ring-0 font-mono disabled:opacity-50"
-                                                v-model="lote.cantidad_salida"
-                                                :disabled="!lote.selected"
-                                                :class="{ 'text-[#ff8c94]': lote.selected && lote.cantidad_salida > lote.stock_disponible }"
-                                            />
-                                            <span class="bg-[#1b1e22] text-xs font-mono text-industrial-muted px-2 py-2 border-l border-[#2d3139]">
-                                                {{ lote.unidad }}
+                                    <!-- Celda editable: Cantidad Utilizada -->
+                                    <td class="px-2 py-2 bg-[#2d3139]/30 border-l border-[#2d3139]">
+                                        <div class="flex flex-col gap-1">
+                                            <!-- Muestra la acumulada previa + la nueva a usar -->
+                                            <div class="flex items-center rounded-lg overflow-hidden bg-[#0e1113] border" :class="lote.selected ? 'border-[#f27b00]' : 'border-[#2d3139]'">
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    :max="lote.stock_planta"
+                                                    class="flex-1 bg-transparent text-right text-[#e1e6eb] border-none px-2 py-1.5 text-sm focus:outline-none focus:ring-0 font-mono disabled:opacity-30"
+                                                    v-model="lote.cantidad_salida"
+                                                    :disabled="!lote.selected"
+                                                    :class="{ 'text-[#ff8c94]': lote.selected && lote.cantidad_salida > lote.stock_planta }"
+                                                />
+                                            </div>
+                                            <span v-if="lote.cantidad_utilizada > 0" class="text-[9px] text-industrial-muted text-right pr-1">
+                                                Previo: {{ Number(lote.cantidad_utilizada).toLocaleString() }}
                                             </span>
                                         </div>
-                                        <div v-if="lote.selected && lote.cantidad_salida > lote.stock_disponible" class="text-xs text-[#ff8c94] mt-1">
-                                            Supera stock (max: {{ Number(lote.stock_disponible).toLocaleString() }})
-                                        </div>
                                     </td>
-                                    <td class="px-3 py-3">
+                                    <!-- Stock en Planta = Cant Adquirida - (Cant Utilizada Histórica + Nueva Cant Utilizada) -->
+                                    <td class="px-3 py-3 text-right font-mono text-xs">
+                                        <span 
+                                            class="font-bold"
+                                            :class="((lote.stock_planta - (lote.selected ? lote.cantidad_salida : 0)) <= 0) ? 'text-[#ff8c94]' : 'text-white'"
+                                        >
+                                            {{ Number(lote.stock_planta - (lote.selected ? lote.cantidad_salida : 0)).toLocaleString() }}
+                                        </span>
+                                    </td>
+                                    <!-- Acciones Planificadas -->
+                                    <td class="px-3 py-2">
                                         <input
                                             type="text"
-                                            class="w-full bg-[#0e1113] text-[#e1e6eb] border border-[#2d3139] rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-[#f27b00] font-sans"
+                                            class="w-full bg-[#0e1113] text-[#e1e6eb] border border-[#2d3139] rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#f27b00] font-sans disabled:opacity-50"
                                             v-model="lote.acciones_planificadas"
                                             :disabled="!lote.selected"
-                                            placeholder="Uso previsto del material..."
-                                            :class="{ 'opacity-50': !lote.selected }"
+                                            placeholder="Uso previsto..."
                                         />
-                                    </td>
-                                    <td class="px-3 py-3 text-center">
-                                        <span
-                                            class="px-2 py-0.5 rounded text-[9px] font-bold"
-                                            :class="{
-                                                'bg-[#0f3d2a] border border-[#1a7f4c] text-[#a6ffcc]': lote.stock_planta === 0 || lote.estado_lote === 'AGOTADO',
-                                                'bg-[#f27b00]/10 border border-[#f27b00]/30 text-[#f27b00]': lote.stock_planta > 0 && lote.stock_planta < lote.cantidad_adquirida,
-                                                'bg-[#1b1e22] border border-[#2d3139] text-industrial-muted': lote.stock_planta === lote.cantidad_adquirida,
-                                            }"
-                                        >
-                                            {{ lote.estado_lote }}
-                                        </span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -313,7 +328,7 @@ const submitForm = () => {
                         class="bg-[#f27b00] hover:bg-[#ff9426] text-[#111417] font-bold py-2.5 px-8 rounded-lg text-sm tracking-wider uppercase transition disabled:opacity-50"
                         :disabled="form.processing || isFormInvalid"
                     >
-                        {{ form.processing ? 'Registrando...' : 'Registrar Salida' }}
+                        {{ form.processing ? 'Registrando...' : 'Guardar Conciliación' }}
                     </button>
                 </div>
             </form>

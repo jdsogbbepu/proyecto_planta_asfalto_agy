@@ -84,38 +84,44 @@ class SalidaController extends Controller
         ]);
     }
 
-    public function getLotesPorProyecto(Request $request)
+    public function getLotesPorProyecto(Request $request, $id_proyecto)
     {
-        $request->validate(['id_proyecto' => 'required|exists:proyectos,id']);
-
-        $lotes = DetalleIngreso::with(['material.medida', 'proveedor', 'proyecto'])
-            ->where('id_proyecto', $request->id_proyecto)
-            ->where('cantidad_actual_lote', '>', 0)
+        // Obtenemos todos los lotes para el id_proyecto (parámetro de ruta)
+        $lotesCollection = DetalleIngreso::with(['material.medida', 'proveedor', 'proyecto', 'ingreso'])
+            ->where('id_proyecto', $id_proyecto)
             ->orderBy('created_at', 'asc')
-            ->get()
-            ->map(function ($lote) {
-                $cantidadUtilizada = (float) $lote->detallesSalida->sum('cantidad_salida');
-                $stockPlanta = (float) $lote->cantidad_actual_lote;
+            ->get();
 
-                return [
-                    'id' => $lote->id,
-                    'nro_registro' => $lote->nro_registro,
-                    'id_material' => $lote->id_material,
-                    'material_nombre' => $lote->material?->nombre,
-                    'unidad' => $lote->material?->medida?->abreviacion,
-                    'id_proveedor' => $lote->id_proveedor,
-                    'proveedor_nombre' => $lote->proveedor?->razon_social,
-                    'fecha_lote' => $lote->fecha_lote?->format('Y-m-d'),
-                    'cantidad_adquirida' => (float) $lote->cantidad_adquirida,
-                    'stock_disponible' => $stockPlanta,
-                    'cantidad_utilizada' => $cantidadUtilizada,
-                    'stock_planta' => $stockPlanta,
-                    'estado_lote' => $stockPlanta <= 0 ? 'AGOTADO' : ($stockPlanta < (float) $lote->cantidad_adquirida ? 'PARCIAL' : 'COMPLETO'),
-                    'acciones_planificadas' => $lote->acciones_planificadas,
-                ];
-            });
+        $lotes = $lotesCollection->map(function ($lote) {
+            $cantidadUtilizada = (float) $lote->detallesSalida->sum('cantidad_salida');
+            $stockPlanta = (float) $lote->cantidad_adquirida - $cantidadUtilizada;
 
-        return response()->json($lotes);
+            return [
+                'id' => $lote->id,
+                'nro_registro' => $lote->nro_registro,
+                'nro_lote' => $lote->id, // Representación de número de lote único
+                'id_material' => $lote->id_material,
+                'material_nombre' => $lote->material?->nombre,
+                'unidad' => $lote->material?->medida?->abreviacion,
+                'id_proveedor' => $lote->id_proveedor,
+                'proveedor_nombre' => $lote->proveedor?->razon_social,
+                'fecha_lote' => $lote->fecha_lote?->format('Y-m-d'),
+                'cantidad_adquirida' => (float) $lote->cantidad_adquirida,
+                'cantidad_utilizada' => $cantidadUtilizada,
+                'stock_planta' => $stockPlanta,
+                'estado_lote' => $stockPlanta <= 0 ? 'AGOTADO' : ($stockPlanta < (float) $lote->cantidad_adquirida ? 'PARCIAL' : 'COMPLETO'),
+                'acciones_planificadas' => $lote->acciones_planificadas,
+            ];
+        });
+
+        // Obtener el último ingreso registrado para autocompletar ODC y observaciones
+        $ultimoIngreso = $lotesCollection->last()?->ingreso;
+        
+        return response()->json([
+            'lotes' => $lotes,
+            'odc_ingreso' => $ultimoIngreso?->odc ?? '',
+            'observaciones_ingreso' => $ultimoIngreso?->observaciones ?? '',
+        ]);
     }
 
     public function store(Request $request)
@@ -123,7 +129,7 @@ class SalidaController extends Controller
         $validated = $request->validate([
             'id_funcionario' => ['required', 'exists:funcionarios,id'],
             'id_proyecto' => ['required', 'exists:proyectos,id'],
-            'odc' => ['nullable', 'string', 'max:50', 'regex:/^[A-Z0-9\/]+$/'],
+            'odc' => ['nullable', 'string', 'max:50'],
             'uso' => ['nullable', 'string', 'max:255'],
             'observaciones' => ['nullable', 'string'],
             'fecha_salida' => ['required', 'date'],
@@ -142,6 +148,7 @@ class SalidaController extends Controller
                 'id_usuario' => auth()->id(),
                 'odc' => $validated['odc'] ?? null,
                 'uso' => $validated['uso'] ?? null,
+                'observaciones' => $validated['observaciones'] ?? null,
                 'fecha_salida' => $validated['fecha_salida'],
             ]);
 
@@ -156,6 +163,7 @@ class SalidaController extends Controller
 
                 $cantSolicitada = (float) $item['cantidad_salida'];
 
+                // En conciliación, la cantidad solicitada no debe superar el stock actual del lote
                 if ($cantSolicitada > (float) $lote->cantidad_actual_lote) {
                     throw new \Exception("Stock insuficiente para lote {$lote->nro_registro}. Solicitado: {$cantSolicitada}, Disponible: {$lote->cantidad_actual_lote}");
                 }
@@ -176,14 +184,14 @@ class SalidaController extends Controller
 
             BitacoraActividad::create([
                 'id_usuario' => Auth::id(),
-                'accion' => 'Registro de Despacho (PEPS)',
-                'detalle' => "Despacho ID {$salida->id}, ODC: " . ($validated['odc'] ?? 'N/A') . ". " . implode('; ', $resumenItems),
+                'accion' => 'Registro de Despacho (Conciliación)',
+                'detalle' => "Conciliación ID {$salida->id}, ODC: " . ($validated['odc'] ?? 'N/A') . ". " . implode('; ', $resumenItems),
                 'ip_address' => $request->ip(),
             ]);
 
             DB::commit();
 
-            return redirect()->route('despachos.index')->with('success', 'Despacho registrado correctamente.');
+            return redirect()->route('despachos.index')->with('success', 'Conciliación registrada correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Error al procesar el despacho: ' . $e->getMessage())->withInput();
