@@ -34,6 +34,12 @@ const form = useForm({
 const lotesDisponibles = ref([]);
 const obsIngreso = ref(''); // Observaciones traídas del ingreso
 
+// Determina si un campo Cant. Utilizada es válido (cantidad_salida > 0 y <= stock_planta)
+const isCantidadValid = (lote) => {
+    const num = parseFloat(lote.cantidad_salida);
+    return num > 0 && num <= lote.stock_planta;
+};
+
 const getSelectedProyectoFecha = () => {
     const proj = props.proyectos.find(p => p.id === Number(selectedProyectoId.value));
     return proj?.fecha || getTodayDate();
@@ -78,18 +84,18 @@ const fetchLotes = async () => {
 
 const selectedLotesCount = computed(() => lotesDisponibles.value.filter(l => l.selected).length);
 
+// Sincroniza disabled cuando cambia la propiedad 'selected'
 const toggleLote = (lote) => {
-    lote.selected = !lote.selected;
-    if (lote.selected && lote.cantidad_salida <= 0) {
+    if (!lote.selected) {
+        lote.cantidad_salida = 0;
+        lote.acciones_planificadas = '';
+    } else if (lote.cantidad_salida <= 0) {
         // Por defecto, si seleccionan, asumen que usarán todo el stock restante
         lote.cantidad_salida = Math.max(0, lote.stock_planta);
-    } else if (!lote.selected) {
-        lote.cantidad_salida = 0;
     }
 };
 
 const isLoteValid = (lote) => {
-    if (!lote.selected) return true;
     return lote.cantidad_salida > 0 && lote.cantidad_salida <= lote.stock_planta;
 };
 
@@ -98,6 +104,10 @@ const isFormInvalid = computed(() => {
     if (selectedItems.length === 0) return true;
     return selectedItems.some(l => !isLoteValid(l));
 });
+
+const getTotalStock = (lote) => {
+    return Number(lote.stock_planta - (lote.selected ? lote.cantidad_salida : 0)).toLocaleString();
+};
 
 const submitForm = () => {
     if (isFormInvalid.value) {
@@ -235,7 +245,6 @@ const submitForm = () => {
                         <table class="w-full text-left text-sm text-[#e1e6eb] whitespace-nowrap">
                             <thead class="text-xs text-industrial-muted uppercase bg-[#0e1113] border-b border-[#2d3139]">
                                 <tr>
-                                    <th class="px-2 py-3 font-semibold text-center w-10">Sel.</th>
                                     <th class="px-3 py-3 font-semibold">Nro RGTR</th>
                                     <th class="px-3 py-3 font-semibold">Nro Lote</th>
                                     <th class="px-3 py-3 font-semibold">Material</th>
@@ -245,6 +254,7 @@ const submitForm = () => {
                                     <th class="px-3 py-3 font-semibold text-right w-32 bg-[#2d3139]/30 border-l border-[#2d3139]">Cant. Utilizada</th>
                                     <th class="px-3 py-3 font-semibold text-right">Stock en Planta</th>
                                     <th class="px-3 py-3 font-semibold min-w-[200px]">Acciones Planificadas</th>
+                                    <th class="px-2 py-3 font-semibold text-center w-20">Concluir</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-[#2d3139]">
@@ -254,14 +264,6 @@ const submitForm = () => {
                                     class="hover:bg-[#1f2329]/10 transition"
                                     :class="{ 'bg-[#f27b00]/5': lote.selected }"
                                 >
-                                    <td class="px-2 py-3 text-center">
-                                        <input
-                                            type="checkbox"
-                                            class="w-4 h-4 rounded border-[#2d3139] bg-[#0e1113] text-[#f27b00] focus:ring-[#f27b00] focus:ring-offset-0 cursor-pointer"
-                                            v-model="lote.selected"
-                                            @change="toggleLote(lote)"
-                                        />
-                                    </td>
                                     <td class="px-3 py-3 font-mono text-xs font-bold text-[#f27b00]">{{ lote.nro_registro }}</td>
                                     <td class="px-3 py-3 font-mono text-xs text-industrial-muted">LOTE-{{ String(lote.nro_lote).padStart(4, '0') }}</td>
                                     <td class="px-3 py-3 text-xs font-sans truncate max-w-[150px]" :title="lote.material_nombre">{{ lote.material_nombre }}</td>
@@ -274,7 +276,7 @@ const submitForm = () => {
                                     <td class="px-2 py-2 bg-[#2d3139]/30 border-l border-[#2d3139]">
                                         <div class="flex flex-col gap-1">
                                             <!-- Muestra la acumulada previa + la nueva a usar -->
-                                            <div class="flex items-center rounded-lg overflow-hidden bg-[#0e1113] border" :class="lote.selected ? 'border-[#f27b00]' : 'border-[#2d3139]'">
+                                            <div class="flex items-center rounded-lg overflow-hidden bg-[#0e1113] border" :class="!lote.selected ? 'border-[#f27b00]' : 'border-[#2d3139]'">
                                                 <input
                                                     type="number"
                                                     step="0.01"
@@ -282,8 +284,8 @@ const submitForm = () => {
                                                     :max="lote.stock_planta"
                                                     class="flex-1 bg-transparent text-right text-[#e1e6eb] border-none px-2 py-1.5 text-sm focus:outline-none focus:ring-0 font-mono disabled:opacity-30"
                                                     v-model="lote.cantidad_salida"
-                                                    :disabled="!lote.selected"
-                                                    :class="{ 'text-[#ff8c94]': lote.selected && lote.cantidad_salida > lote.stock_planta }"
+                                                    :disabled="lote.selected"
+                                                    :class="{ 'text-[#ff8c94]': !lote.selected && lote.cantidad_salida > lote.stock_planta }"
                                                 />
                                             </div>
                                             <span v-if="lote.cantidad_utilizada > 0" class="text-[9px] text-industrial-muted text-right pr-1">
@@ -293,11 +295,11 @@ const submitForm = () => {
                                     </td>
                                     <!-- Stock en Planta = Cant Adquirida - (Cant Utilizada Histórica + Nueva Cant Utilizada) -->
                                     <td class="px-3 py-3 text-right font-mono text-xs">
-                                        <span 
+                                        <span
                                             class="font-bold"
-                                            :class="((lote.stock_planta - (lote.selected ? lote.cantidad_salida : 0)) <= 0) ? 'text-[#ff8c94]' : 'text-white'"
+                                            :class="((lote.stock_planta - (!lote.selected ? lote.cantidad_salida : 0)) <= 0) ? 'text-[#ff8c94]' : 'text-white'"
                                         >
-                                            {{ Number(lote.stock_planta - (lote.selected ? lote.cantidad_salida : 0)).toLocaleString() }}
+                                            {{ Number(lote.stock_planta - (!lote.selected ? lote.cantidad_salida : 0)).toLocaleString() }}
                                         </span>
                                     </td>
                                     <!-- Acciones Planificadas -->
@@ -306,8 +308,17 @@ const submitForm = () => {
                                             type="text"
                                             class="w-full bg-[#0e1113] text-[#e1e6eb] border border-[#2d3139] rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#f27b00] font-sans disabled:opacity-50"
                                             v-model="lote.acciones_planificadas"
-                                            :disabled="!lote.selected"
+                                            :disabled="lote.selected"
                                             placeholder="Uso previsto..."
+                                        />
+                                    </td>
+                                    <!-- Columna Concluir -->
+                                    <td class="px-2 py-3 text-center">
+                                        <input
+                                            type="checkbox"
+                                            class="w-4 h-4 rounded border-[#2d3139] bg-[#0e1113] text-[#f27b00] focus:ring-[#f27b00] focus:ring-offset-0 cursor-pointer"
+                                            v-model="lote.selected"
+                                            @change="toggleLote(lote)"
                                         />
                                     </td>
                                 </tr>
