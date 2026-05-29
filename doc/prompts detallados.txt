@@ -204,3 +204,7 @@ en el "1. Informacion del Proyecto Relacionado" tendra:
 de esa forma sera la tabla para mostrar los datos del proyecto seleccionado(materiales y/o lotes).
 - lo unico que quiero que se ingrese sera en "cantidad utilizada", "acciones planificadas para su uso" y "Stock en planta"(se calculara con una operacion de "Cant adquirida" - "cant utilizada" = Stock en planta(residuo)).
 -todos los demas datos se mostraran y sobreescribiran(no se podran editar) segun los datos que se llenaron anteriormente de cada proyecto en"INGRESOS(LOTES)".
+
+
+-------------------------------------version 2---------------------------------
+en la parte del panel izquierdo en:DESPACHOS(PEPS)- Registrar Salida / Despacho (PEPS) quiero que apliques este cambio para cuando seleccione un proyecto y me aparezcan sus materiales y lotes: ok ahora si reconoce, aprende de ese error para que no te pase otra vez ok?, ahora esa parte de "seleccionar" no me parece bien, envez de eso ahora aremos esto: envez de "seleccionar" pondremos al final a lado de "Acciones Planificadas" el campo de "concluir" con esa misma opcion de marcar con bien(la cual estara por defecto sin marcar) y si estan sin marcar obviamente todos los campos de "Cant. Utilizada y  acciones planificadas estaran libres de editar" y cuando cuando este marcado con un bien(recien se podra en plomo como para que no se pueda editar) ok? 
