@@ -86,13 +86,13 @@ const selectedLotesCount = computed(() => lotesDisponibles.value.filter(l => l.s
 
 // Sincroniza disabled cuando cambia la propiedad 'selected'
 const toggleLote = (lote) => {
-    if (!lote.selected) {
-        lote.cantidad_salida = 0;
-        lote.acciones_planificadas = '';
-    } else if (lote.cantidad_salida <= 0) {
-        // Por defecto, si seleccionan, asumen que usarán todo el stock restante
+    // Solo establecemos un valor por defecto si es la primera vez que se selecciona
+    // y no tiene un valor ingresado por el usuario
+    if (lote.selected && lote.cantidad_salida <= 0) {
+        // Por defecto, si seleccionan y no han ingresado nada, asumimos que usarán todo el stock restante
         lote.cantidad_salida = Math.max(0, lote.stock_planta);
     }
+    // NO reseteamos el valor cuando se desmarca - el usuario mantiene lo que ingresó
 };
 
 const isLoteValid = (lote) => {
@@ -229,7 +229,7 @@ const submitForm = () => {
                             2. Registro de Salidas del Proyecto
                         </h3>
                         <span class="text-xs text-industrial-muted font-bold px-3 py-1 bg-[#2d3139] rounded-full">
-                            {{ selectedLotesCount }} ítem(s) seleccionado(s) para editar
+                            {{ selectedLotesCount }} ítem(s) concluido(s)
                         </span>
                     </div>
 
