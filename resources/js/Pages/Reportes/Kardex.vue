@@ -160,18 +160,45 @@ const printBalanceRows = computed(() => {
     }
 
     if (activeReport.value === 'fechas') {
-        const rows = (props.reporteFechas?.movimientos || [])
-            .map((mov) => ({
+        const groupedRows = new Map();
+
+        (props.reporteFechas?.movimientos || []).forEach((mov) => {
+            const key = [
+                mov.proyecto_id || mov.proyecto_nombre || 'SIN_PROYECTO',
+                mov.material_id || mov.material_nombre || 'SIN_MATERIAL',
+                mov.nro_registro || mov.odc || 'SIN_LOTE',
+                mov.fecha_adquisicion || String(mov.fecha || '').slice(0, 10),
+            ].join('|');
+
+            const current = groupedRows.get(key) || {
                 material: mov.material_nombre,
                 unidad: mov.unidad,
                 proyecto: mov.proyecto_nombre,
                 fecha_adquisicion: mov.fecha_adquisicion || String(mov.fecha || '').slice(0, 10),
                 odc: mov.odc || mov.nro_registro,
-                cantidad_adquirida: mov.cantidad_adquirida || mov.entrada,
-                cantidad_utilizada: mov.cantidad_utilizada || mov.salida,
-                stock_actual: mov.stock_actual ?? Math.max(0, Number(mov.entrada || 0) - Number(mov.salida || 0)),
+                cantidad_adquirida: 0,
+                cantidad_utilizada: 0,
+                stock_actual: 0,
                 acciones: mov.acciones_planificadas || mov.auxiliar,
-            }))
+            };
+
+            if (mov.tipo === 'INGRESO') {
+                current.cantidad_adquirida += Number(mov.cantidad_adquirida || mov.entrada || 0);
+            } else if (current.cantidad_adquirida <= 0) {
+                current.cantidad_adquirida = Math.max(
+                    current.cantidad_adquirida,
+                    Number(mov.cantidad_adquirida || 0)
+                );
+            }
+
+            current.cantidad_utilizada += Number(mov.salida || 0);
+            current.stock_actual = Math.max(current.stock_actual, Number(mov.stock_actual || 0));
+            current.acciones = current.acciones || mov.acciones_planificadas || mov.auxiliar;
+
+            groupedRows.set(key, current);
+        });
+
+        const rows = Array.from(groupedRows.values())
             .sort((a, b) => {
                 const byProject = String(a.proyecto || '').localeCompare(String(b.proyecto || ''), 'es');
                 if (byProject !== 0) return byProject;
