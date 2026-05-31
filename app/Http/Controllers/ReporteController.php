@@ -319,6 +319,39 @@ class ReporteController extends Controller
             ->sortBy('timestamp')
             ->values();
 
+        $loteRegistros = $movimientos
+            ->pluck('nro_registro')
+            ->filter()
+            ->unique()
+            ->values();
+
+        $lotesBalance = DetalleIngreso::with(['ingreso', 'proyecto', 'material.medida', 'detallesSalida'])
+            ->whereIn('nro_registro', $loteRegistros)
+            ->orderBy('id_proyecto')
+            ->orderBy('fecha_lote')
+            ->orderBy('id')
+            ->get()
+            ->map(function ($lote) {
+                $cantidadUtilizada = (float) $lote->detallesSalida->sum('cantidad_salida');
+                $stockPlanta = (float) $lote->cantidad_adquirida - $cantidadUtilizada;
+
+                return [
+                    'id' => $lote->id,
+                    'nro_registro' => $lote->nro_registro,
+                    'proyecto_id' => $lote->id_proyecto,
+                    'proyecto_nombre' => $lote->proyecto?->nombre,
+                    'material_id' => $lote->id_material,
+                    'material_nombre' => $lote->material?->nombre,
+                    'unidad' => $lote->material?->medida?->abreviacion,
+                    'fecha_adquisicion' => $lote->fecha_lote?->format('Y-m-d') ?? $lote->ingreso?->fecha_adquirida,
+                    'odc' => $lote->ingreso?->odc ?? $lote->nro_registro,
+                    'cantidad_adquirida' => (float) $lote->cantidad_adquirida,
+                    'cantidad_utilizada' => $cantidadUtilizada,
+                    'stock_actual' => $stockPlanta,
+                    'acciones_planificadas' => $lote->acciones_planificadas,
+                ];
+            });
+
         $agrupado = $movimientos
             ->groupBy('proyecto_id')
             ->map(function ($movimientosProyecto) {
@@ -355,6 +388,7 @@ class ReporteController extends Controller
             ],
             'agrupado' => $agrupado,
             'movimientos' => $movimientos->reverse()->values(),
+            'lotes_balance' => $lotesBalance,
         ];
     }
 
