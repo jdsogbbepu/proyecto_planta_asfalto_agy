@@ -106,7 +106,11 @@ const isFormInvalid = computed(() => {
 });
 
 const getTotalStock = (lote) => {
-    return Number(lote.stock_planta - (lote.selected ? lote.cantidad_salida : 0)).toLocaleString();
+    return getStockRestante(lote).toLocaleString();
+};
+
+const getStockRestante = (lote) => {
+    return Number(lote.stock_planta) - Number(lote.cantidad_salida || 0);
 };
 
 const submitForm = () => {
@@ -297,9 +301,9 @@ const submitForm = () => {
                                     <td class="px-3 py-3 text-right font-mono text-xs">
                                         <span
                                             class="font-bold"
-                                            :class="((lote.stock_planta - (!lote.selected ? lote.cantidad_salida : 0)) <= 0) ? 'text-[#ff8c94]' : 'text-white'"
+                                            :class="getStockRestante(lote) <= 0 ? 'text-[#ff8c94]' : 'text-white'"
                                         >
-                                            {{ Number(lote.stock_planta - (!lote.selected ? lote.cantidad_salida : 0)).toLocaleString() }}
+                                            {{ getStockRestante(lote).toLocaleString() }}
                                         </span>
                                     </td>
                                     <!-- Acciones Planificadas -->
