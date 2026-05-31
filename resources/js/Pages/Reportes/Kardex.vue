@@ -126,8 +126,26 @@ const stateLabel = (lote) => {
 };
 
 const printBalanceRows = computed(() => {
+    const withProjectBands = (rows) => {
+        let lastProject = null;
+        let groupIndex = -1;
+
+        return rows.map((row) => {
+            const projectKey = row.proyecto || 'SIN PROYECTO';
+            if (projectKey !== lastProject) {
+                groupIndex += 1;
+                lastProject = projectKey;
+            }
+
+            return {
+                ...row,
+                projectBand: groupIndex % 2,
+            };
+        });
+    };
+
     if (activeReport.value === 'proyecto') {
-        return (props.reporteProyecto?.lotes || []).map((lote, index) => ({
+        return withProjectBands((props.reporteProyecto?.lotes || []).map((lote, index) => ({
             nro: index + 1,
             material: lote.material_nombre,
             unidad: lote.unidad,
@@ -138,22 +156,34 @@ const printBalanceRows = computed(() => {
             cantidad_utilizada: lote.cantidad_utilizada,
             stock_actual: lote.stock_actual,
             acciones: lote.acciones_planificadas,
-        }));
+        })));
     }
 
     if (activeReport.value === 'fechas') {
-        return (props.reporteFechas?.movimientos || []).map((mov, index) => ({
-            nro: index + 1,
-            material: mov.material_nombre,
-            unidad: mov.unidad,
-            proyecto: mov.proyecto_nombre,
-            fecha_adquisicion: mov.fecha_adquisicion || String(mov.fecha || '').slice(0, 10),
-            odc: mov.odc || mov.nro_registro,
-            cantidad_adquirida: mov.cantidad_adquirida || mov.entrada,
-            cantidad_utilizada: mov.cantidad_utilizada || mov.salida,
-            stock_actual: mov.stock_actual ?? Math.max(0, Number(mov.entrada || 0) - Number(mov.salida || 0)),
-            acciones: mov.acciones_planificadas || mov.auxiliar,
-        }));
+        const rows = (props.reporteFechas?.movimientos || [])
+            .map((mov) => ({
+                material: mov.material_nombre,
+                unidad: mov.unidad,
+                proyecto: mov.proyecto_nombre,
+                fecha_adquisicion: mov.fecha_adquisicion || String(mov.fecha || '').slice(0, 10),
+                odc: mov.odc || mov.nro_registro,
+                cantidad_adquirida: mov.cantidad_adquirida || mov.entrada,
+                cantidad_utilizada: mov.cantidad_utilizada || mov.salida,
+                stock_actual: mov.stock_actual ?? Math.max(0, Number(mov.entrada || 0) - Number(mov.salida || 0)),
+                acciones: mov.acciones_planificadas || mov.auxiliar,
+            }))
+            .sort((a, b) => {
+                const byProject = String(a.proyecto || '').localeCompare(String(b.proyecto || ''), 'es');
+                if (byProject !== 0) return byProject;
+
+                const byDate = String(a.fecha_adquisicion || '').localeCompare(String(b.fecha_adquisicion || ''));
+                if (byDate !== 0) return byDate;
+
+                return String(a.material || '').localeCompare(String(b.material || ''), 'es');
+            })
+            .map((row, index) => ({ ...row, nro: index + 1 }));
+
+        return withProjectBands(rows);
     }
 
     return [];
@@ -423,7 +453,11 @@ const handlePrint = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="row in printBalanceRows" :key="`project-print-${row.nro}`">
+                                    <tr
+                                        v-for="row in printBalanceRows"
+                                        :key="`project-print-${row.nro}`"
+                                        :class="row.projectBand === 1 ? 'balance-project-band-alt' : 'balance-project-band-base'"
+                                    >
                                         <td>{{ row.nro }}</td>
                                         <td>{{ row.material || '-' }}</td>
                                         <td>{{ row.unidad || '-' }}</td>
@@ -570,7 +604,11 @@ const handlePrint = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="row in printBalanceRows" :key="`date-print-${row.nro}`">
+                                    <tr
+                                        v-for="row in printBalanceRows"
+                                        :key="`date-print-${row.nro}`"
+                                        :class="row.projectBand === 1 ? 'balance-project-band-alt' : 'balance-project-band-base'"
+                                    >
                                         <td>{{ row.nro }}</td>
                                         <td>{{ row.material || '-' }}</td>
                                         <td>{{ row.unidad || '-' }}</td>
@@ -906,8 +944,17 @@ const handlePrint = () => {
         font-weight: 700;
     }
 
-    .balance-print-table tbody tr:nth-child(odd) td {
-        background: #f7f7f7 !important;
+    .balance-print-table tr.balance-project-band-base td {
+        background: #fff !important;
+    }
+
+    .balance-print-table tr.balance-project-band-alt td {
+        background: #eeeeee !important;
+    }
+
+    .balance-print-table tr.balance-project-band-base + tr.balance-project-band-alt td,
+    .balance-print-table tr.balance-project-band-alt + tr.balance-project-band-base td {
+        border-top: 2px solid #000 !important;
     }
 
     .print-header {
