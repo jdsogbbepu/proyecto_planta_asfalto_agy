@@ -2,6 +2,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted, computed } from 'vue';
+import WeatherWidget from '@/Components/WeatherWidget.vue';
+import CityMap from '@/Components/CityMap.vue';
 
 const props = defineProps({
     materials: {
@@ -130,62 +132,11 @@ const hasCriticalStock = computed(() => {
                     </div>
                 </div>
 
-                <!-- Card 2: Live Telemetry (Col-span-8) -->
+                <!-- Card 2: Clima y Mapa El Alto (Col-span-8) -->
                 <div class="bento-card lg:col-span-8 p-6 flex flex-col justify-between bg-[#1b1e22]/90 backdrop-blur-md">
-                    <div>
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-base font-bold text-white tracking-tight">Telemetría de Planta y Sensores</h3>
-                            <span class="text-[10px] font-mono bg-[#0e1113] border border-[#2d3139] text-[#f27b00] font-bold px-2 py-0.5 rounded-full uppercase flex items-center gap-1.5">
-                                <span class="h-1.5 w-1.5 rounded-full bg-[#f27b00] animate-ping"></span>
-                                Transmisión Activa
-                            </span>
-                        </div>
-
-                        <!-- Live Metrics Display -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-                            <!-- Weight Card -->
-                            <div class="bg-[#0e1113] border border-[#2d3139] rounded-xl p-5 flex flex-col justify-between shadow-inner hover:border-[#f27b00]/30 transition duration-150">
-                                <span class="text-[10px] text-industrial-muted font-bold tracking-wider uppercase">Báscula de Descarga (Peso Neto)</span>
-                                <div class="flex items-baseline gap-2 mt-2">
-                                    <span class="text-3xl font-extrabold font-mono text-[#f27b00] tracking-tight">{{ scaleWeight }}</span>
-                                    <span class="text-xs text-industrial-muted font-mono font-bold">kg</span>
-                                </div>
-                                <div class="flex items-center gap-2 mt-4 text-[10px] text-emerald-400">
-                                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    <span>PLC Balanza Operativo</span>
-                                </div>
-                            </div>
-
-                            <!-- Temp Card -->
-                            <div class="bg-[#0e1113] border border-[#2d3139] rounded-xl p-5 flex flex-col justify-between shadow-inner hover:border-[#f27b00]/30 transition duration-150">
-                                <span class="text-[10px] text-industrial-muted font-bold tracking-wider uppercase">Temperatura de Mezclador</span>
-                                <div class="flex items-baseline gap-2 mt-2">
-                                    <span class="text-3xl font-extrabold font-mono text-[#f27b00] tracking-tight">{{ mixerTemp }}</span>
-                                    <span class="text-xs text-industrial-muted font-mono font-bold">°C</span>
-                                </div>
-                                <div class="flex items-center gap-2 mt-4 text-[10px] text-emerald-400">
-                                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    <span>Rango Óptimo (140°C - 165°C)</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Hoppers (Tolvas) graphic indicators -->
-                        <div>
-                            <h4 class="text-xs font-bold text-industrial-muted uppercase tracking-wider mb-4">Estado de Tolvas de Agregados</h4>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                <div v-for="n in 4" :key="n" class="bg-[#0e1113] border border-[#2d3139] rounded-xl p-3 text-center">
-                                    <span class="text-[10px] text-industrial-muted font-bold font-mono">TOLVA 0{{ n }}</span>
-                                    <div class="w-6 h-16 bg-[#111417] border border-[#2d3139] mx-auto my-2 relative rounded overflow-hidden">
-                                        <div 
-                                            class="absolute bottom-0 left-0 right-0 bg-[#f27b00] transition-all duration-1000"
-                                            :style="{ height: [75, 45, 90, 20][n-1] + '%' }"
-                                        ></div>
-                                    </div>
-                                    <span class="text-xs font-mono font-bold text-white">{{ [75, 45, 90, 20][n-1] }}%</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="space-y-4">
+                        <WeatherWidget />
+                        <CityMap />
                     </div>
                 </div>
 

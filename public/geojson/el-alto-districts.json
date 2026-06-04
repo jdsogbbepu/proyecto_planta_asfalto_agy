@@ -1,0 +1,310 @@
+{
+    "type": "FeatureCollection",
+    "name": "Distritos de El Alto",
+    "crs": {
+        "type": "name",
+        "properties": { "name": "urn:ogc:def:crs:EPSG::4326" }
+    },
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "D1",
+                "name": "Distrito 1",
+                "fullName": "Zona Central",
+                "avenues": "Av. 6 de Marzo, Av. Fernando Saucedo, Av. Busch",
+                "points": "Plaza principal, Mercado 1° de Mayo, Catedral"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [-68.1600, -16.4850],
+                    [-68.1500, -16.4850],
+                    [-68.1500, -16.4950],
+                    [-68.1600, -16.4950],
+                    [-68.1600, -16.4850]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "D2",
+                "name": "Distrito 2",
+                "fullName": "Ciudad Satélite",
+                "avenues": "Av. Jorge Caetro, Av. Kanturani, Av. AW",
+                "points": "Estadio Jorge Wilsterman, Centro Comercial Satélite"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [-68.1450, -16.4950],
+                    [-68.1300, -16.4950],
+                    [-68.1300, -16.5100],
+                    [-68.1450, -16.5100],
+                    [-68.1450, -16.4950]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "D3",
+                "name": "Distrito 3",
+                "fullName": "Alto Lima - 16 de Julio",
+                "avenues": "Av. Peru, Av. Ballivián, Av. Sánchez",
+                "points": "Mercado 16 de Julio, Universidad Pública"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [-68.1300, -16.4950],
+                    [-68.1150, -16.4950],
+                    [-68.1150, -16.5150],
+                    [-68.1300, -16.5150],
+                    [-68.1300, -16.4950]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "D4",
+                "name": "Distrito 4",
+                "fullName": "Pallo Loma",
+                "avenues": "Av. 14 de Septiembre, Av. Litoral",
+                "points": "Zona residencial, Colegio Nacional"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [-68.1500, -16.4850],
+                    [-68.1350, -16.4850],
+                    [-68.1350, -16.4950],
+                    [-68.1500, -16.4950],
+                    [-68.1500, -16.4850]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "D5",
+                "name": "Distrito 5",
+                "fullName": "Villa大小姐 (Exaltación)",
+                "avenues": "Av. Litoral, Av. Los Andes",
+                "points": "Zona urbana, Centro de salud"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [-68.1600, -16.4950],
+                    [-68.1450, -16.4950],
+                    [-68.1450, -16.5100],
+                    [-68.1600, -16.5100],
+                    [-68.1600, -16.4950]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "D6",
+                "name": "Distrito 6",
+                "fullName": "La Perez",
+                "avenues": "Av. 6 de Agosto, Av. Democrácia",
+                "points": "Mercado callejero, Estadio"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [-68.1700, -16.4950],
+                    [-68.1550, -16.4950],
+                    [-68.1550, -16.5100],
+                    [-68.1700, -16.5100],
+                    [-68.1700, -16.4950]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "D7",
+                "name": "Distrito 7",
+                "fullName": "Senkata",
+                "avenues": "Av. Senkata, Av. 3 de Mayo",
+                "points": "Zona industrial, Talleres mecánicos"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [-68.1650, -16.4750],
+                    [-68.1500, -16.4750],
+                    [-68.1500, -16.4900],
+                    [-68.1650, -16.4900],
+                    [-68.1650, -16.4750]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "D8",
+                "name": "Distrito 8",
+                "fullName": "Plan 3 Mil",
+                "avenues": "Av. 6 de Marzo, Av.del Policia",
+                "points": "Urbanización Plan 3 Mil"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [-68.1750, -16.5000],
+                    [-68.1600, -16.5000],
+                    [-68.1600, -16.5150],
+                    [-68.1750, -16.5150],
+                    [-68.1750, -16.5000]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "D9",
+                "name": "Distrito 9",
+                "fullName": "Santa Rosa",
+                "avenues": "Av. Litoral, Av. Santa Rosa",
+                "points": "Zona residential, Iglesia colonial"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [-68.1550, -16.5150],
+                    [-68.1400, -16.5150],
+                    [-68.1400, -16.5300],
+                    [-68.1550, -16.5300],
+                    [-68.1550, -16.5150]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "D10",
+                "name": "Distrito 10",
+                "fullName": "Urb. Magisterio",
+                "avenues": "Av. Del Maestro, Av. 14 de Septiembre",
+                "points": "Urbanización Magisterio"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [-68.1400, -16.5000],
+                    [-68.1250, -16.5000],
+                    [-68.1250, -16.5150],
+                    [-68.1400, -16.5150],
+                    [-68.1400, -16.5000]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "D11",
+                "name": "Distrito 11",
+                "fullName": "Barrio Lindo",
+                "avenues": "Av.军民共建, Av. Los Kjarkas",
+                "points": "Barrio Lindo, Mirador"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [-68.1250, -16.4900],
+                    [-68.1100, -16.4900],
+                    [-68.1100, -16.5050],
+                    [-68.1250, -16.5050],
+                    [-68.1250, -16.4900]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "D12",
+                "name": "Distrito 12",
+                "fullName": "Kenko",
+                "avenues": "Av. Kenko, Av. 31 de Octubre",
+                "points": "Zona comercial, Estadio技巧"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [-68.1350, -16.4800],
+                    [-68.1200, -16.4800],
+                    [-68.1200, -16.4950],
+                    [-68.1350, -16.4950],
+                    [-68.1350, -16.4800]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "D13",
+                "name": "Distrito 13",
+                "fullName": "Urbanización markers",
+                "avenues": "Av. Las Palmeras, Av. El Vergel",
+                "points": "Zona nueva, Reservorio"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [-68.1450, -16.5200],
+                    [-68.1300, -16.5200],
+                    [-68.1300, -16.5350],
+                    [-68.1450, -16.5350],
+                    [-68.1450, -16.5200]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "D14",
+                "name": "Distrito 14",
+                "fullName": "Zona Industrial",
+                "avenues": "Av. Industrial, Av. La Paz",
+                "points": "Fábricas, Galpones"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [-68.1700, -16.4850],
+                    [-68.1550, -16.4850],
+                    [-68.1550, -16.5000],
+                    [-68.1700, -16.5000],
+                    [-68.1700, -16.4850]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "D15",
+                "name": "Distrito 15",
+                "fullName": "Altiplano Norte",
+                "avenues": "Ruta a Desaguadero",
+                "points": "Zona rural, Puestos de control"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [-68.1800, -16.4900],
+                    [-68.1600, -16.4900],
+                    [-68.1600, -16.5200],
+                    [-68.1800, -16.5200],
+                    [-68.1800, -16.4900]
+                ]]
+            }
+        }
+    ]
+}
