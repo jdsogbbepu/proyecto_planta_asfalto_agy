@@ -47,58 +47,179 @@
 }
 
 :root {
-    --color-background: #111417;
-    --color-card: #1b1e22;
-    --color-field: #0e1113;
+    --color-background: #080a0d;
+    --color-surface-1: #0d1014;
+    --color-surface-2: #11161a;
+    --color-surface-3: #161b21;
+    --color-elevated: #1c2229;
+
+    --color-ink-primary: #e8eaed;
+    --color-ink-secondary: #9aa0a9;
+    --color-ink-tertiary: #5c6370;
+    --color-ink-muted: #3d434d;
+
+    --color-bitumen: #1a1d21;
+    --color-steel: #2a3038;
+    --color-steel-light: #3a424d;
+
     --color-accent: #f27b00;
-    --color-secondary-accent: #0a5c8f;
-    --color-foreground: #e1e6eb;
-    --color-muted: #8a949f;
-    --color-border: #2d3139;
+    --color-accent-dim: rgba(242, 123, 0, 0.15);
+    --color-accent-glow: rgba(242, 123, 0, 0.4);
 
-    --color-success-bg: #0f3d2a;
-    --color-success-border: #1a7f4c;
-    --color-success-text: #a6ffcc;
+    --color-status-active: #22c55e;
+    --color-status-warning: #f59e0b;
+    --color-status-danger: #ef4444;
+    --color-status-info: #3b82f6;
 
-    --color-warning-bg: #3b2c12;
-    --color-warning-border: #8a6125;
-    --color-warning-text: #ffe0a6;
-
-    --color-destructive-bg: #3b1d22;
-    --color-destructive-border: #8a252c;
-    --color-destructive-text: #ff8c94;
+    --color-border: rgba(255, 255, 255, 0.06);
+    --color-border-emphasis: rgba(255, 255, 255, 0.1);
+    --color-border-strong: rgba(255, 255, 255, 0.15);
 }
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom scrollbars and styling for dark theme */
 body {
     background-color: var(--color-background);
-    color: var(--color-foreground);
+    color: var(--color-ink-primary);
     font-family: 'Fira Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* Bento card transitions */
-.bento-card {
-    background-color: var(--color-card);
+.control-panel {
+    background: var(--color-surface-1);
     border: 1px solid var(--color-border);
-    border-radius: 12px;
-    transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 8px;
 }
 
-.bento-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(242, 123, 0, 0.4);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.7), 0 0 12px rgba(242, 123, 0, 0.15);
+.control-panel-raised {
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
 }
 
-/* Reduced motion */
+.indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-steel);
+}
+
+.indicator-active {
+    background: var(--color-status-active);
+    box-shadow: 0 0 8px var(--color-status-active), 0 0 16px rgba(34, 197, 94, 0.3);
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.indicator-warning {
+    background: var(--color-status-warning);
+    box-shadow: 0 0 8px var(--color-status-warning);
+}
+
+.indicator-danger {
+    background: var(--color-status-danger);
+    box-shadow: 0 0 8px var(--color-status-danger);
+}
+
+@keyframes pulse-glow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.data-readout {
+    font-family: 'Fira Code', monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.control-bar {
+    height: 3px;
+    background: var(--color-steel);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.control-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-family: 'Fira Code', monospace;
+}
+
+.status-badge-active {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #4ade80;
+}
+
+.status-badge-warning {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #fbbf24;
+}
+
+.status-badge-danger {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-ink-tertiary);
+    margin-bottom: 12px;
+}
+
+.section-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+}
+
+.scrollbar-control::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+.scrollbar-control::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollbar-control::-webkit-scrollbar-thumb {
+    background: var(--color-steel);
+    border-radius: 2px;
+}
+
+.scrollbar-control::-webkit-scrollbar-thumb:hover {
+    background: var(--color-steel-light);
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .bento-card {
-        transition: none !important;
-        transform: none !important;
-        box-shadow: none !important;
+    .control-bar-fill {
+        transition: none;
+    }
+    .indicator-active {
+        animation: none;
     }
 }
