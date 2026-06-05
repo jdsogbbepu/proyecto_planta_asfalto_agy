@@ -1,5 +1,6 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import 'leaflet/dist/leaflet.css';
+import { ref, onMounted, computed, onErrorCaptured } from 'vue';
 import { LMap, LTileLayer, LGeoJson, LMarker, LPopup } from '@vue-leaflet/vue-leaflet';
 import L from 'leaflet';
 
@@ -9,9 +10,9 @@ const INITIAL_ZOOM = 13;
 const mapRef = ref(null);
 const geoJsonData = ref(null);
 const selectedDistrict = ref(null);
-const hoveredDistrict = ref(null);
 const loading = ref(true);
 const error = ref(null);
+const mapError = ref(false);
 
 const mainMarkers = [
     { id: 1, coords: [-16.4928, -68.1512], title: 'Planta de Asfalto', description: 'Ubicación principal' },
@@ -26,7 +27,8 @@ const districtColors = [
 const getDistrictColor = (index) => districtColors[index % districtColors.length];
 
 const style = (feature, index) => {
-    const isSelected = selectedDistrict.value === feature.properties?.c_dist_mun;
+    if (!feature?.properties) return { color: '#f27b00', weight: 1.5, opacity: 0.9, fillColor: '#f27b00', fillOpacity: 0.2 };
+    const isSelected = selectedDistrict.value === feature.properties.c_dist_mun;
     const baseColor = getDistrictColor(index);
     return {
         color: isSelected ? '#ff9426' : baseColor,
@@ -59,32 +61,36 @@ const defaultIcon = L.icon({
 const fetchGeoJson = async () => {
     try {
         loading.value = true;
+        error.value = null;
         const response = await fetch('/geojson/el-alto-districts.json');
-        if (!response.ok) throw new Error('No se pudo cargar el GeoJSON');
-        geoJsonData.value = await response.json();
+        if (!response.ok) throw new Error('Error al cargar GeoJSON');
+        const data = await response.json();
+        if (!data?.features) throw new Error('Formato de GeoJSON inválido');
+        geoJsonData.value = data;
     } catch (e) {
+        console.warn('GeoJSON load error:', e);
         error.value = e.message;
+        geoJsonData.value = { type: 'FeatureCollection', features: [] };
     } finally {
         loading.value = false;
     }
 };
 
 const onEachFeature = (feature, layer, index) => {
-    const props = feature.properties || {};
+    if (!feature?.properties) return;
+    const props = feature.properties;
     const districtName = props.c_dist_mun || `Distrito ${index + 1}`;
 
     layer.on({
         mouseover: (e) => {
             e.target.setStyle(highlightStyle(feature, index));
             e.target.bringToFront();
-            hoveredDistrict.value = props;
         },
         mouseout: (e) => {
             const isSelected = selectedDistrict.value === districtName;
             if (!isSelected) {
                 e.target.setStyle(style(feature, index));
             }
-            hoveredDistrict.value = null;
         },
         click: (e) => {
             if (mapRef.value?.leafletObject) {
@@ -118,15 +124,17 @@ const resetView = () => {
 };
 
 const districts = computed(() => {
-    if (!geoJsonData.value?.features) return [];
-    return geoJsonData.value.features.map((f, i) => ({
-        name: f.properties?.c_dist_mun || `Distrito ${i + 1}`,
-        population: f.properties?.poblacion || '0',
-        area: f.properties?.area_km2 ? parseFloat(f.properties.area_km2).toFixed(2) : '0',
-        color: getDistrictColor(i),
-        index: i,
-    }));
-}).sort((a, b) => parseInt(b.population) - parseInt(a.population));
+    if (!geoJsonData.value?.features?.length) return [];
+    return geoJsonData.value.features
+        .map((f, i) => ({
+            name: f.properties?.c_dist_mun || `Distrito ${i + 1}`,
+            population: f.properties?.poblacion || '0',
+            area: f.properties?.area_km2 ? parseFloat(f.properties.area_km2).toFixed(2) : '0',
+            color: getDistrictColor(i),
+            index: i,
+        }))
+        .sort((a, b) => parseInt(b.population) - parseInt(a.population));
+});
 
 const selectedDistrictData = computed(() => {
     if (!selectedDistrict.value) return null;
@@ -134,8 +142,14 @@ const selectedDistrictData = computed(() => {
 });
 
 const maxPopulation = computed(() => {
-    return Math.max(...districts.value.map(d => parseInt(d.population) || 1), 1);
+    const populations = districts.value.map(d => parseInt(d.population) || 1);
+    return populations.length ? Math.max(...populations) : 1;
 });
+
+const handleMapError = () => {
+    mapError.value = true;
+    console.warn('Map rendering error - showing fallback');
+};
 
 onMounted(() => {
     fetchGeoJson();
@@ -171,7 +185,7 @@ onMounted(() => {
                     </div>
                 </div>
 
-                <div v-if="error && !geoJsonData" class="absolute inset-0 flex items-center justify-center bg-[#0e1113] z-10">
+                <div v-if="error && !geoJsonData?.features?.length" class="absolute inset-0 flex items-center justify-center bg-[#0e1113] z-10">
                     <div class="text-center p-4">
                         <div class="text-2xl mb-2">⚠️</div>
                         <p class="text-xs text-red-400">{{ error }}</p>
@@ -185,6 +199,7 @@ onMounted(() => {
                     :use-global-leaflet="false"
                     class="h-full w-full"
                     :options="{ zoomControl: true, attributionControl: false }"
+                    @error="handleMapError"
                 >
                     <l-tile-layer
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -193,7 +208,7 @@ onMounted(() => {
                     />
 
                     <l-geo-json
-                        v-if="geoJsonData"
+                        v-if="geoJsonData?.features?.length"
                         :geojson="geoJsonData"
                         :options-style="(f) => style(f, geoJsonData.features.indexOf(f))"
                         :options-on-each-feature="(f, l) => onEachFeature(f, l, geoJsonData.features.indexOf(f))"
@@ -260,7 +275,7 @@ onMounted(() => {
                         <div class="bg-[#0e1113] rounded-xl p-4 border border-[#2d3139]">
                             <span class="text-[10px] text-industrial-muted uppercase tracking-wider">Densidad</span>
                             <p class="text-lg font-bold font-mono text-white mt-1">
-                                {{ (parseInt(selectedDistrictData.population) / parseFloat(selectedDistrictData.area)).toFixed(0) }}
+                                {{ (parseInt(selectedDistrictData.population) / parseFloat(selectedDistrictData.area || 1)).toFixed(0) }}
                                 <span class="text-xs text-industrial-muted font-normal"> hab/km²</span>
                             </p>
                         </div>

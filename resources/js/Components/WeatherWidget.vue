@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, onErrorCaptured } from 'vue';
 import { useWeather } from '@/composables/useWeather';
 
 const {
@@ -11,24 +11,35 @@ const {
     fetchWeather,
 } = useWeather();
 
-const isHovered = ref(false);
+const componentError = ref(null);
+
+onErrorCaptured((err) => {
+    console.error('WeatherWidget error:', err);
+    componentError.value = err.message;
+    return false;
+});
 
 onMounted(() => {
-    fetchWeather();
-    setInterval(fetchWeather, 30 * 60 * 1000);
+    try {
+        fetchWeather();
+        setInterval(fetchWeather, 30 * 60 * 1000);
+    } catch (e) {
+        console.error('Weather init error:', e);
+    }
 });
 
 const hasData = computed(() => currentWeather.value !== null);
 
 const getTrendIcon = (index) => {
     if (index === 0) return '';
+    if (!dailyForecast.value || !dailyForecast.value[index] || !dailyForecast.value[index - 1]) return '';
     if (dailyForecast.value[index]?.tempMax > dailyForecast.value[index - 1]?.tempMax) return '↑';
     if (dailyForecast.value[index]?.tempMax < dailyForecast.value[index - 1]?.tempMax) return '↓';
     return '→';
 };
 
 const getTrendClass = (index) => {
-    if (index === 0) return '';
+    if (index === 0 || !dailyForecast.value || !dailyForecast.value[index] || !dailyForecast.value[index - 1]) return '';
     const current = dailyForecast.value[index]?.tempMax;
     const previous = dailyForecast.value[index - 1]?.tempMax;
     if (current > previous) return 'text-red-400';
@@ -60,9 +71,9 @@ const getTrendClass = (index) => {
             </div>
         </div>
 
-        <div v-if="error" class="p-6 text-center">
+        <div v-if="error || componentError" class="p-6 text-center">
             <div class="text-2xl mb-2">⚠️</div>
-            <p class="text-xs text-red-400">{{ error }}</p>
+            <p class="text-xs text-red-400">{{ error || componentError }}</p>
             <button
                 @click="fetchWeather"
                 class="mt-2 text-xs text-[#f27b00] hover:underline"
