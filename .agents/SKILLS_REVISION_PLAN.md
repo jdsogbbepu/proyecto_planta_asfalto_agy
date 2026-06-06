@@ -6,14 +6,14 @@ Guía de uso de las skills instaladas para revisar, limpiar y optimizar tu proye
 
 ## Skills Disponibles
 
-| Skill | Propósito | Orden Recomendado |
-|-------|-----------|-------------------|
-| `diagnose` | Diagnóstico de bugs y problemas difíciles | 1º |
-| `vercel-react-best-practices` | Optimización de rendimiento React/Next.js | 2º |
-| `error-handling-patterns` | Revisión de manejo de errores | 3º |
-| `systematic-debugging` | Debugging sistemático de problemas | 4º |
-| `improve-codebase-architecture` | Mejora de arquitectura y estructura | 5º |
-| `caveman` | Modo compressión para reducir tokens | Opcional |
+| Skill                           | Propósito                                 | Orden Recomendado |
+| ------------------------------- | ----------------------------------------- | ----------------- |
+| `diagnose`                      | Diagnóstico de bugs y problemas difíciles | 1º                |
+| `vercel-react-best-practices`   | Optimización de rendimiento React/Next.js | 2º                |
+| `error-handling-patterns`       | Revisión de manejo de errores             | 3º                |
+| `systematic-debugging`          | Debugging sistemático de problemas        | 4º                |
+| `improve-codebase-architecture` | Mejora de arquitectura y estructura       | 5º                |
+| `caveman`                       | Modo compressión para reducir tokens      | Opcional          |
 
 ---
 
@@ -24,6 +24,7 @@ Guía de uso de las skills instaladas para revisar, limpiar y optimizar tu proye
 **Skill:** `diagnose`
 
 **Prompt para activar:**
+
 ```
 Usa la skill "diagnose" para revisar mi codebase. Busca:
 1. Bugs o errores existentes
@@ -32,6 +33,7 @@ Usa la skill "diagnose" para revisar mi codebase. Busca:
 ```
 
 **Qué hace:**
+
 - Crea un loop de feedback para reproducir problemas
 - Formula hipótesis y las testa
 - No propone cambios hasta confirmar el problema
@@ -43,9 +45,11 @@ Usa la skill "diagnose" para revisar mi codebase. Busca:
 **Skill:** `vercel-react-best-practices`
 
 **Prompt para activar:**
+
 ```
 Usa la skill "vercel-react-best-practices" para revisar mi código React/Next.js.
 Enfócate en:
+
 1. Eliminating Waterfalls (CRITICAL)
 2. Bundle Size Optimization (CRITICAL)
 3. Re-render Optimization (MEDIUM)
@@ -53,6 +57,7 @@ Enfócate en:
 ```
 
 **Qué hace:**
+
 - Revisa las 70 reglas de optimización de Vercel
 - Identifica problemas de rendimiento en componentes
 - Sugiere patrones de data fetching
@@ -64,6 +69,7 @@ Enfócate en:
 **Skill:** `error-handling-patterns`
 
 **Prompt para activar:**
+
 ```
 Usa la skill "error-handling-patterns" para revisar:
 1. Cómo se manejan los errores en mi código
@@ -73,6 +79,7 @@ Usa la skill "error-handling-patterns" para revisar:
 ```
 
 **Qué hace:**
+
 - Identifica empty catch blocks
 - Verifica que errores tengan stack traces y metadata
 - Revisa si hay fallbacks apropiados
@@ -84,6 +91,7 @@ Usa la skill "error-handling-patterns" para revisar:
 **Skill:** `systematic-debugging`
 
 **Prompt para activar:**
+
 ```
 Usa la skill "systematic-debugging" para:
 1. Identificar código que puede ser problemático
@@ -92,6 +100,7 @@ Usa la skill "systematic-debugging" para:
 ```
 
 **Qué hace:**
+
 - Fase 1: Construir loop de feedback
 - Fase 2: Reproducir problemas
 - Fase 3: Formular hipótesis
@@ -104,6 +113,7 @@ Usa la skill "systematic-debugging" para:
 **Skill:** `improve-codebase-architecture`
 
 **Prompt para activar:**
+
 ```
 Usa la skill "improve-codebase-architecture" para:
 1. Revisar la estructura de archivos
@@ -113,6 +123,7 @@ Usa la skill "improve-codebase-architecture" para:
 ```
 
 **Qué hace:**
+
 - Analiza dependencias entre módulos
 - Identifica violating layers
 - Propone拆分 (split) de archivos muy grandes
@@ -125,16 +136,19 @@ Usa la skill "improve-codebase-architecture" para:
 **Skill:** `caveman`
 
 Úsalo cuando:
+
 - Las respuestas son muy largas
 - Quieres ahorrar tokens
 - Necesitas respuestas ultra-brev
 
 **Prompt:**
+
 ```
 Activa modo caveman (full)
 ```
 
 **Niveles disponibles:**
+
 - `lite` - Profesional pero breve
 - `full` - Drop articles, fragmentos OK (default)
 - `ultra` - Máxima compresión
@@ -144,14 +158,17 @@ Activa modo caveman (full)
 ## Consejos por Tipo de Proyecto
 
 ### PHP/Laravel (Backend puro)
+
 - Saltar `vercel-react-best-practices` (no aplica)
 - Enfocarse en: `diagnose`, `error-handling-patterns`, `systematic-debugging`
 
 ### React/Next.js (Full-stack)
+
 - Seguir el orden recomendado completo
 - Priorizar: bundle size + re-renders
 
 ### JavaScript Vanilla
+
 - `vercel-react-best-practices` solo reglas de JS (sección 7)
 - `error-handling-patterns` para patterns generales
 
@@ -168,6 +185,7 @@ Finalmente usa "improve-codebase-architecture" para estructura.
 ```
 
 **Orden al combinar:**
+
 1. `diagnose` - Problemas primero
 2. `error-handling-patterns` - Validación
 3. `improve-codebase-architecture` - Estructura
@@ -178,16 +196,19 @@ Finalmente usa "improve-codebase-architecture" para estructura.
 ## Checklist Rápido por Sesión
 
 ### Antes de empezar
+
 - [ ] Backup del código (git)
 - [ ] Limpiar archivos temporales
 - [ ] Definir alcance (todo el proyecto o módulo específico)
 
 ### Durante
+
 - [ ] Tomar notas de problemas encontrados
 - [ ] Priorizar por impacto
 - [ ] Anotar archivos que necesitan cambios
 
 ### Después
+
 - [ ] Implementar fixes más críticos primero
 - [ ] Testear cambios
 - [ ] Documentar decisiones de arquitectura
