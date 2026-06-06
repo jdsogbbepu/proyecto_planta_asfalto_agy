@@ -192,7 +192,12 @@ class SalidaController extends Controller
             DB::commit();
 
             return redirect()->route('despachos.index')->with('success', 'Conciliación registrada correctamente.');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('SalidaController::store failed', [
+                'user_id' => auth()->id(),
+                'items_count' => count($validated['items'] ?? []),
+                'exception' => $e,
+            ]);
             DB::rollBack();
             return redirect()->back()->with('error', 'Error al procesar el despacho: ' . $e->getMessage())->withInput();
         }
@@ -203,8 +208,14 @@ class SalidaController extends Controller
         DB::beginTransaction();
 
         try {
+            $lotes = DetalleIngreso::whereHas('detallesSalida', function ($query) use ($salida) {
+                $query->where('id_salida', $salida->id);
+            })->lockForUpdate()->get();
+
+            $salida->load(['detalles.detalleIngreso']);
+
             foreach ($salida->detalles as $detalleSalida) {
-                $lote = DetalleIngreso::find($detalleSalida->id_detalle_ingreso);
+                $lote = $detalleSalida->detalleIngreso;
                 if ($lote) {
                     $lote->update([
                         'cantidad_actual_lote' => (float) $lote->cantidad_actual_lote + (float) $detalleSalida->cantidad_salida,
@@ -225,7 +236,12 @@ class SalidaController extends Controller
 
             DB::commit();
             return redirect()->route('despachos.index')->with('success', 'Despacho revertido. Los saldos fueron restaurados.');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('SalidaController::destroy failed', [
+                'salida_id' => $salida->id ?? null,
+                'user_id' => auth()->id(),
+                'exception' => $e,
+            ]);
             DB::rollBack();
             return redirect()->route('despachos.index')->with('error', 'Error al revertir: ' . $e->getMessage());
         }

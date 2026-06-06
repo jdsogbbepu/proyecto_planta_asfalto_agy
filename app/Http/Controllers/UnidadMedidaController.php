@@ -45,7 +45,12 @@ class UnidadMedidaController extends Controller
         try {
             $unidadMedida->delete();
             return redirect()->back()->with('success', 'Unidad de medida eliminada correctamente.');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('UnidadMedidaController::destroy failed', [
+                'unidad_medida_id' => $unidadMedida->id,
+                'user_id' => auth()->id(),
+                'exception' => $e,
+            ]);
             return redirect()->back()->with('error', 'No se puede eliminar la unidad de medida porque está siendo utilizada por uno o más materiales.');
         }
     }

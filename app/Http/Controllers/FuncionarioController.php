@@ -60,10 +60,14 @@ class FuncionarioController extends Controller
         try {
             $funcionario->delete();
             return redirect()->route('funcionarios.index')->with('success', 'Funcionario eliminado correctamente.');
-        } catch (\Exception $e) {
-            // Logically deactivate if tied to transactions
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('FuncionarioController::destroy failed', [
+                'funcionario_id' => $funcionario->id,
+                'user_id' => auth()->id(),
+                'exception' => $e,
+            ]);
             $funcionario->update(['activo' => false]);
-            return redirect()->route('funcionarios.index')->with('success', 'El funcionario tiene registros asociados. Ha sido desactivado lógicamente.');
+            return redirect()->route('funcionarios.index')->with('warning', 'El funcionario tiene registros asociados. Ha sido desactivado lógicamente.');
         }
     }
 }

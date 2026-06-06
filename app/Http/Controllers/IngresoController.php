@@ -129,7 +129,7 @@ class IngresoController extends Controller
 
                 $material = Material::find($item['id_material']);
                 $proyecto = Proyecto::find($item['id_proyecto']);
-                $resumenItems[] = "{$nroRegistro}: {$item['cantidad']} {$material->nombre} para {$proyecto->nombre}";
+                $resumenItems[] = "{$nroRegistro}: {$item['cantidad']} " . ($material->nombre ?? 'N/A') . " para " . ($proyecto->nombre ?? 'N/A');
             }
 
             BitacoraActividad::create([
@@ -142,7 +142,13 @@ class IngresoController extends Controller
             DB::commit();
 
             return redirect()->route('ingresos.index')->with('success', 'Lote(s) registrado(s) correctamente.');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('IngresoController::store failed', [
+                'ingreso_id' => $ingreso->id ?? null,
+                'user_id' => auth()->id(),
+                'items_count' => count($validated['items'] ?? []),
+                'exception' => $e,
+            ]);
             DB::rollBack();
             return redirect()->back()->with('error', 'Error al procesar el registro: ' . $e->getMessage())->withInput();
         }
@@ -172,7 +178,12 @@ class IngresoController extends Controller
 
             DB::commit();
             return redirect()->route('ingresos.index')->with('success', 'Ingreso y lotes eliminados correctamente.');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('IngresoController::destroy failed', [
+                'ingreso_id' => $ingreso->id,
+                'user_id' => auth()->id(),
+                'exception' => $e,
+            ]);
             DB::rollBack();
             return redirect()->route('ingresos.index')->with('error', 'Error al eliminar: ' . $e->getMessage());
         }

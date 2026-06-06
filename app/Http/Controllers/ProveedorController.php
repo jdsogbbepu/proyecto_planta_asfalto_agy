@@ -60,7 +60,12 @@ class ProveedorController extends Controller
         try {
             $proveedor->delete();
             return redirect()->route('proveedores.index')->with('success', 'Proveedor eliminado correctamente.');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('ProveedorController::destroy failed', [
+                'proveedor_id' => $proveedor->id,
+                'user_id' => auth()->id(),
+                'exception' => $e,
+            ]);
             return redirect()->route('proveedores.index')->with('error', 'No se puede eliminar el proveedor porque tiene registros de ingresos de materiales asociados.');
         }
     }

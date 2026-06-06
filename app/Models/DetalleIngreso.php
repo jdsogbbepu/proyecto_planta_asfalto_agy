@@ -75,12 +75,16 @@ class DetalleIngreso extends Model
 
     public static function generarNroRegistro(int $anio): string
     {
-        $ultimo = static::where('nro_registro', 'like', 'RGTR-' . $anio . '-%')
-            ->orderBy('id', 'desc')
-            ->first();
+        $lockKey = 'nro_registro_lock_' . $anio;
 
-        $sigienteNumero = $ultimo ? ((int) str_replace('RGTR-' . $anio . '-', '', $ultimo->nro_registro)) + 1 : 1;
+        return \Illuminate\Support\Facades\Cache::lock($lockKey, 10)->block(5, function () use ($anio) {
+            $ultimo = static::where('nro_registro', 'like', 'RGTR-' . $anio . '-%')
+                ->orderBy('id', 'desc')
+                ->first();
 
-        return 'RGTR-' . $anio . '-' . str_pad($sigienteNumero, 4, '0', STR_PAD_LEFT);
+            $sigienteNumero = $ultimo ? ((int) str_replace('RGTR-' . $anio . '-', '', $ultimo->nro_registro)) + 1 : 1;
+
+            return 'RGTR-' . $anio . '-' . str_pad($sigienteNumero, 4, '0', STR_PAD_LEFT);
+        });
     }
 }

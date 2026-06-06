@@ -78,7 +78,12 @@ class ProyectoController extends Controller
             ]);
 
             return redirect()->route('proyectos.index')->with('success', 'Proyecto eliminado correctamente.');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('ProyectoController::destroy failed', [
+                'proyecto_id' => $id,
+                'user_id' => auth()->id(),
+                'exception' => $e,
+            ]);
             return redirect()->route('proyectos.index')->with('error', 'No se puede eliminar el proyecto porque tiene ingresos o despachos asociados.');
         }
     }

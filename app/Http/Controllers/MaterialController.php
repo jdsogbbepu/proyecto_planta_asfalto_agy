@@ -94,7 +94,12 @@ class MaterialController extends Controller
             ]);
 
             return redirect()->route('materials.index')->with('success', 'Material eliminado correctamente.');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('MaterialController::destroy failed', [
+                'material_id' => $id,
+                'user_id' => auth()->id(),
+                'exception' => $e,
+            ]);
             return redirect()->route('materials.index')->with('error', 'No se puede eliminar el material porque tiene registros históricos de ingresos o despachos asociados.');
         }
     }

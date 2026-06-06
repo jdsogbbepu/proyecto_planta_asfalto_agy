@@ -91,8 +91,12 @@ class UserController extends Controller
         try {
             $user->delete();
             return redirect()->route('users.index')->with('success', 'Usuario eliminado correctamente.');
-        } catch (\Exception $e) {
-            // If they have dependencies (like ticket records, registers, etc.), deactivate them logically instead.
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('UserController::destroy failed', [
+                'user_id' => $user->id,
+                'attempted_by' => auth()->id(),
+                'exception' => $e,
+            ]);
             $user->update(['active' => false]);
             return redirect()->route('users.index')->with('success', 'El usuario tiene registros asociados. Ha sido desactivado lógicamente.');
         }
