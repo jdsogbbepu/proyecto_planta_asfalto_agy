@@ -1,7 +1,16 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import { ref, computed, watchEffect } from 'vue';
+
+const page = usePage();
+
+watchEffect(() => {
+    if (page.props.flash?.nuevo_ingreso_id) {
+        window.open(route('ingresos.pdf', page.props.flash.nuevo_ingreso_id), '_blank');
+        page.props.flash.nuevo_ingreso_id = null;
+    }
+});
 
 const props = defineProps({
     ingresos: { type: Array, required: true },
@@ -120,6 +129,14 @@ const getLoteNro = (index) => 'LOTE-' + String(index + 1).padStart(3, '0');
                                     <td class="px-4 py-3.5 text-xs text-industrial-muted">{{ ingreso.funcionario_nombre || '—' }}</td>
                                     <td class="px-4 py-3.5 text-xs text-industrial-muted">{{ ingreso.registrado_por }}</td>
                                     <td class="px-4 py-3.5 text-right" @click.stop>
+                                        <a
+                                            :href="route('ingresos.pdf', ingreso.id)"
+                                            target="_blank"
+                                            class="text-xs bg-[#2d3139] hover:bg-[#383d47] text-white font-semibold py-1.5 px-3 rounded border border-[#2d3139] transition mr-2 inline-block"
+                                            title="Imprimir Recibo PDF"
+                                        >
+                                            PDF
+                                        </a>
                                         <button
                                             v-if="$page.props.auth.permissions.includes('gestionar_ingresos')"
                                             @click="deleteIngreso(ingreso)"

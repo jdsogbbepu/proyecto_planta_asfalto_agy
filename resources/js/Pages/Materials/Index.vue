@@ -223,6 +223,7 @@ const confirmDeleteUnit = (unit) => {
                                     <th class="px-6 py-4 font-semibold">Descripción</th>
                                     <th class="px-6 py-4 font-semibold">Unidad</th>
                                     <th class="px-6 py-4 font-semibold text-right">Stock Mínimo</th>
+                                    <th class="px-6 py-4 font-semibold text-right text-[#f27b00]">Stock Total en Planta</th>
                                     <th v-if="$page.props.auth.user.role !== 'visor'" class="px-6 py-4 font-semibold text-right">Acciones</th>
                                 </tr>
                             </thead>
@@ -240,8 +241,11 @@ const confirmDeleteUnit = (unit) => {
                                             {{ material.medida?.nombre }} ({{ material.medida?.abreviacion }})
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-right font-mono text-xs font-semibold text-[#f27b00]">
+                                    <td class="px-6 py-4 text-right font-mono text-xs font-semibold text-industrial-muted">
                                         {{ Number(material.stock_minimo).toLocaleString() }}
+                                    </td>
+                                    <td class="px-6 py-4 text-right font-mono text-sm font-bold" :class="material.stock_total <= material.stock_minimo ? 'text-[#ff8c94]' : 'text-emerald-400'">
+                                        {{ Number(material.stock_total || 0).toLocaleString() }}
                                     </td>
                                     <td v-if="$page.props.auth.user.role !== 'visor'" class="px-6 py-4 text-right space-x-2">
                                         <button

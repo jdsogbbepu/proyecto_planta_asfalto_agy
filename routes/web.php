@@ -90,15 +90,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('ingresos/crear', [IngresoController::class, 'create'])->name('ingresos.create');
         Route::post('ingresos', [IngresoController::class, 'store'])->name('ingresos.store');
         Route::delete('ingresos/{ingreso}', [IngresoController::class, 'destroy'])->name('ingresos.destroy');
-    });
-
-    // Módulo de Despachos / Salidas (gestionar_salidas)
-    Route::middleware('permission:gestionar_salidas')->group(function () {
+        Route::get('ingresos/{ingreso}/pdf', [IngresoController::class, 'generarPdf'])->name('ingresos.pdf');
+        
+        // Módulo de Despachos / Salidas (gestionar_salidas)
         Route::get('despachos', [SalidaController::class, 'index'])->name('despachos.index');
         Route::get('despachos/crear', [SalidaController::class, 'create'])->name('despachos.create');
         Route::post('despachos', [SalidaController::class, 'store'])->name('despachos.store');
         Route::delete('despachos/{salida}', [SalidaController::class, 'destroy'])->name('despachos.destroy');
         Route::get('despachos/lotes/{id_proyecto}', [SalidaController::class, 'getLotesPorProyecto'])->name('despachos.lotes');
+        Route::get('despachos/lotes-material/{id_material}', [SalidaController::class, 'getLotesPorMaterial'])->name('despachos.lotes.material');
+        Route::get('despachos/{salida}/pdf', [SalidaController::class, 'generarPdf'])->name('despachos.pdf');
     });
 
     // Reportes / Kardex (ver_reportes)

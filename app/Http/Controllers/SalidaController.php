@@ -124,6 +124,56 @@ class SalidaController extends Controller
         ]);
     }
 
+    public function getLotesPorMaterial(Request $request, $id_material)
+    {
+        $lotesCollection = DetalleIngreso::with(['material.medida', 'proveedor', 'proyecto', 'ingreso'])
+            ->where('id_material', $id_material)
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $lotes = $lotesCollection->map(function ($lote) {
+            $cantidadUtilizada = (float) $lote->detallesSalida->sum('cantidad_salida');
+            $stockPlanta = (float) $lote->cantidad_adquirida - $cantidadUtilizada;
+
+            return [
+                'id' => $lote->id,
+                'nro_registro' => $lote->nro_registro,
+                'nro_lote' => $lote->id,
+                'id_proyecto' => $lote->id_proyecto,
+                'proyecto_nombre' => $lote->proyecto?->nombre,
+                'id_material' => $lote->id_material,
+                'material_nombre' => $lote->material?->nombre,
+                'unidad' => $lote->material?->medida?->abreviacion,
+                'id_proveedor' => $lote->id_proveedor,
+                'proveedor_nombre' => $lote->proveedor?->razon_social,
+                'fecha_lote' => $lote->fecha_lote?->format('Y-m-d'),
+                'cantidad_adquirida' => (float) $lote->cantidad_adquirida,
+                'cantidad_utilizada' => $cantidadUtilizada,
+                'stock_planta' => $stockPlanta,
+                'estado_lote' => $stockPlanta <= 0 ? 'AGOTADO' : ($stockPlanta < (float) $lote->cantidad_adquirida ? 'PARCIAL' : 'COMPLETO'),
+                'acciones_planificadas' => $lote->acciones_planificadas,
+            ];
+        });
+
+        return response()->json([
+            'lotes' => $lotes,
+        ]);
+    }
+
+    public function generarPdf(Salida $salida)
+    {
+        $salida->load([
+            'funcionario',
+            'proyecto',
+            'usuario',
+            'detalles.detalleIngreso.material.medida',
+            'detalles.detalleIngreso.proveedor',
+        ]);
+        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.acta_salida', compact('salida'));
+        return $pdf->stream("acta_salida_{$salida->id}.pdf");
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -191,7 +241,10 @@ class SalidaController extends Controller
 
             DB::commit();
 
-            return redirect()->route('despachos.index')->with('success', 'Conciliación registrada correctamente.');
+            return redirect()->route('despachos.index')->with([
+                'success' => 'Conciliación registrada correctamente.',
+                'nueva_salida_id' => $salida->id
+            ]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('SalidaController::store failed', [
                 'user_id' => auth()->id(),

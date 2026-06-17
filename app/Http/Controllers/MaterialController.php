@@ -17,7 +17,7 @@ class MaterialController extends Controller
     public function index()
     {
         return Inertia::render('Materials/Index', [
-            'materials' => Material::with('medida')->orderBy('nombre')->get(),
+            'materials' => Material::with(['medida', 'detallesIngreso'])->orderBy('nombre')->get(),
             'unidadMedidas' => UnidadMedida::orderBy('nombre')->get(),
         ]);
     }

@@ -141,7 +141,10 @@ class IngresoController extends Controller
 
             DB::commit();
 
-            return redirect()->route('ingresos.index')->with('success', 'Lote(s) registrado(s) correctamente.');
+            return redirect()->route('ingresos.index')->with([
+                'success' => 'Ingreso registrado correctamente.',
+                'nuevo_ingreso_id' => $ingreso->id
+            ]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('IngresoController::store failed', [
                 'ingreso_id' => $ingreso->id ?? null,
@@ -152,6 +155,20 @@ class IngresoController extends Controller
             DB::rollBack();
             return redirect()->back()->with('error', 'Error al procesar el registro: ' . $e->getMessage())->withInput();
         }
+    }
+
+    public function generarPdf(Ingreso $ingreso)
+    {
+        $ingreso->load([
+            'funcionario',
+            'usuario',
+            'detalles.material.medida',
+            'detalles.proveedor',
+            'detalles.proyecto',
+        ]);
+        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.acta_ingreso', compact('ingreso'));
+        return $pdf->stream("acta_ingreso_{$ingreso->id}.pdf");
     }
 
     public function destroy(Request $request, Ingreso $ingreso)

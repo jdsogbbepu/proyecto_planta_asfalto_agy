@@ -17,6 +17,12 @@ class Material extends Model
         'id_medida',
         'stock_minimo',
     ];
+    protected $appends = ['stock_total'];
+
+    public function getStockTotalAttribute()
+    {
+        return $this->detallesIngreso()->sum('cantidad_actual_lote');
+    }
 
     public function medida(): BelongsTo
     {

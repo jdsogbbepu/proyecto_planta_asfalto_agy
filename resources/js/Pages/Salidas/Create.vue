@@ -18,7 +18,9 @@ const getTodayDate = () => {
     return `${yyyy}-${mm}-${dd}`;
 };
 
+const activeTab = ref('proyecto'); // 'proyecto' o 'material'
 const selectedProyectoId = ref('');
+const selectedMaterialId = ref('');
 const headerFecha = ref(getTodayDate());
 
 const form = useForm({
@@ -26,19 +28,13 @@ const form = useForm({
     id_proyecto: '',
     odc: '',
     uso: '',
-    observaciones: '', // Observaciones de salida (el nuevo campo)
+    observaciones: '',
     fecha_salida: getTodayDate(),
     items: [],
 });
 
 const lotesDisponibles = ref([]);
-const obsIngreso = ref(''); // Observaciones traídas del ingreso
-
-// Determina si un campo Cant. Utilizada es válido (cantidad_salida > 0 y <= stock_planta)
-const isCantidadValid = (lote) => {
-    const num = parseFloat(lote.cantidad_salida);
-    return num > 0 && num <= lote.stock_planta;
-};
+const obsIngreso = ref(''); 
 
 const getSelectedProyectoFecha = () => {
     const proj = props.proyectos.find(p => p.id === Number(selectedProyectoId.value));
@@ -52,7 +48,24 @@ const onProyectoChange = () => {
     form.items = [];
     form.odc = '';
     obsIngreso.value = '';
-    fetchLotes();
+    
+    if (activeTab.value === 'proyecto') {
+        fetchLotes();
+    }
+};
+
+const onMaterialChange = () => {
+    fetchLotesPorMaterial();
+};
+
+const onTabChange = (tab) => {
+    activeTab.value = tab;
+    lotesDisponibles.value = [];
+    if (tab === 'proyecto' && selectedProyectoId.value) {
+        fetchLotes();
+    } else if (tab === 'material' && selectedMaterialId.value) {
+        fetchLotesPorMaterial();
+    }
 };
 
 const fetchLotes = async () => {
@@ -61,20 +74,13 @@ const fetchLotes = async () => {
         return;
     }
     try {
-        // Usamos una URL directa en lugar de route() en el script setup para evitar ReferenceErrors
         const response = await axios.get('/despachos/lotes/' + selectedProyectoId.value);
         const data = response.data;
-        
-        // Autocompletar cabecera con el último ingreso
         if (data.odc_ingreso) form.odc = data.odc_ingreso;
         if (data.observaciones_ingreso) obsIngreso.value = data.observaciones_ingreso;
 
         lotesDisponibles.value = data.lotes.map(lote => ({
-            ...lote,
-            selected: false,
-            // Esta cantidad_salida representa lo que se va a sumar a la cantidad_utilizada en este despacho
-            cantidad_salida: 0, 
-            acciones_planificadas: lote.acciones_planificadas || '',
+            ...lote, selected: false, cantidad_salida: 0, acciones_planificadas: lote.acciones_planificadas || '',
         }));
     } catch (error) {
         console.error('Error fetching lotes:', error);
@@ -82,17 +88,30 @@ const fetchLotes = async () => {
     }
 };
 
+const fetchLotesPorMaterial = async () => {
+    if (!selectedMaterialId.value) {
+        lotesDisponibles.value = [];
+        return;
+    }
+    try {
+        const response = await axios.get('/despachos/lotes-material/' + selectedMaterialId.value);
+        const data = response.data;
+
+        lotesDisponibles.value = data.lotes.map(lote => ({
+            ...lote, selected: false, cantidad_salida: 0, acciones_planificadas: lote.acciones_planificadas || '',
+        }));
+    } catch (error) {
+        console.error('Error fetching lotes material:', error);
+        lotesDisponibles.value = [];
+    }
+};
+
 const selectedLotesCount = computed(() => lotesDisponibles.value.filter(l => l.selected).length);
 
-// Sincroniza disabled cuando cambia la propiedad 'selected'
 const toggleLote = (lote) => {
-    // Solo establecemos un valor por defecto si es la primera vez que se selecciona
-    // y no tiene un valor ingresado por el usuario
     if (lote.selected && lote.cantidad_salida <= 0) {
-        // Por defecto, si seleccionan y no han ingresado nada, asumimos que usarán todo el stock restante
         lote.cantidad_salida = Math.max(0, lote.stock_planta);
     }
-    // NO reseteamos el valor cuando se desmarca - el usuario mantiene lo que ingresó
 };
 
 const isLoteValid = (lote) => {
@@ -100,14 +119,11 @@ const isLoteValid = (lote) => {
 };
 
 const isFormInvalid = computed(() => {
-    const selectedItems = lotesDisponibles.value.filter(l => l.selected);
-    if (selectedItems.length === 0) return true;
-    return selectedItems.some(l => !isLoteValid(l));
+    if (!form.id_proyecto) return true;
+    const validItems = lotesDisponibles.value.filter(l => l.cantidad_salida > 0);
+    if (validItems.length === 0) return true;
+    return validItems.some(l => !isLoteValid(l));
 });
-
-const getTotalStock = (lote) => {
-    return getStockRestante(lote).toLocaleString();
-};
 
 const getStockRestante = (lote) => {
     return Number(lote.stock_planta) - Number(lote.cantidad_salida || 0);
@@ -115,11 +131,11 @@ const getStockRestante = (lote) => {
 
 const submitForm = () => {
     if (isFormInvalid.value) {
-        alert('Seleccione al menos un lote e ingrese cantidades válidas.');
+        alert('Complete la información del proyecto y asigne cantidades válidas a los lotes a despachar.');
         return;
     }
     form.items = lotesDisponibles.value
-        .filter(l => l.selected && l.cantidad_salida > 0)
+        .filter(l => l.cantidad_salida > 0)
         .map(l => ({
             id_detalle_ingreso: l.id,
             cantidad_salida: l.cantidad_salida,
@@ -228,21 +244,51 @@ const submitForm = () => {
                 </div>
 
                 <div class="bg-[#1b1e22] border border-[#2d3139] rounded-xl p-6 shadow-xl">
-                    <div class="flex items-center justify-between border-b border-[#2d3139] pb-3 mb-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#2d3139] pb-3 mb-4 gap-4">
                         <h3 class="text-base font-bold text-white tracking-tight">
-                            2. Registro de Salidas del Proyecto
+                            2. Registro de Salidas de Materiales
                         </h3>
-                        <span class="text-xs text-industrial-muted font-bold px-3 py-1 bg-[#2d3139] rounded-full">
-                            {{ selectedLotesCount }} ítem(s) concluido(s)
-                        </span>
+                        <div class="flex items-center gap-2">
+                            <!-- Switch mode -->
+                            <div class="flex bg-[#0e1113] p-1 rounded-lg border border-[#2d3139]">
+                                <button type="button" @click="onTabChange('proyecto')" class="px-4 py-1.5 text-xs font-bold rounded-md transition" :class="activeTab === 'proyecto' ? 'bg-[#2d3139] text-white shadow' : 'text-industrial-muted hover:text-white'">Por Proyecto</button>
+                                <button type="button" @click="onTabChange('material')" class="px-4 py-1.5 text-xs font-bold rounded-md transition" :class="activeTab === 'material' ? 'bg-[#2d3139] text-white shadow' : 'text-industrial-muted hover:text-white'">Por Material</button>
+                            </div>
+                            <span class="text-xs text-industrial-muted font-bold px-3 py-1 bg-[#2d3139] rounded-full">
+                                {{ selectedLotesCount }} ítem(s) concluido(s)
+                            </span>
+                        </div>
                     </div>
 
-                    <div v-if="!selectedProyectoId" class="text-center py-12 text-industrial-muted text-sm bg-[#0e1113]/50 rounded-lg border border-dashed border-[#2d3139]">
-                        Seleccione primero el Proyecto para cargar los materiales.
+                    <div v-if="activeTab === 'material'" class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-[#0e1113] rounded-lg border border-[#2d3139]">
+                        <div>
+                            <label class="block text-xs font-semibold text-industrial-muted uppercase tracking-wider mb-2">Seleccionar Insumo Específico</label>
+                            <select
+                                class="w-full bg-[#1b1e22] text-[#e1e6eb] border border-[#2d3139] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#f27b00]"
+                                v-model="selectedMaterialId"
+                                @change="onMaterialChange"
+                            >
+                                <option value="">-- Buscar por Material --</option>
+                                <option v-for="mat in materials" :key="mat.id" :value="mat.id">
+                                    {{ mat.nombre }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <p class="text-xs text-industrial-muted mb-3">Busca todos los lotes en la planta que contienen este material, independientemente del proyecto de origen.</p>
+                        </div>
+                    </div>
+
+                    <div v-if="activeTab === 'proyecto' && !selectedProyectoId" class="text-center py-12 text-industrial-muted text-sm bg-[#0e1113]/50 rounded-lg border border-dashed border-[#2d3139]">
+                        Seleccione primero el Proyecto Destino (Arriba) para cargar sus materiales originarios.
+                    </div>
+                    
+                    <div v-else-if="activeTab === 'material' && !selectedMaterialId" class="text-center py-12 text-industrial-muted text-sm bg-[#0e1113]/50 rounded-lg border border-dashed border-[#2d3139]">
+                        Seleccione el Material que desea despachar.
                     </div>
 
                     <div v-else-if="lotesDisponibles.length === 0" class="text-center py-12 text-industrial-muted text-sm bg-[#0e1113]/50 rounded-lg border border-dashed border-[#2d3139]">
-                        No se encontraron registros de ingreso para este proyecto.
+                        No se encontraron registros de ingreso para esta búsqueda.
                     </div>
 
                     <div v-else class="overflow-x-auto pb-4">
